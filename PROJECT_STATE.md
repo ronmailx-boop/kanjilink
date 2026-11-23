@@ -1,11 +1,12 @@
 # Kanjilink: Project State
 
 ## Current Focus
-v0.1 runs on Ron's phone (debug APK from Actions): "everything works". Fixed from his screenshots: chips cut
-off with a large system font (now wrap), and the English UI was mirrored on a Hebrew phone (now forced LTR).
-Ron found "Again" vs "I know it" unclear (both just moved on). Now: each button shows when the kanji comes
-back ("back in 10 min" / "back in 3 days"), a toast confirms it, and a kanji seen before starts hidden
-("Show meaning") as a real self-test. Next: Pro unlock (Play Billing) and Play Console preparation.
+Preparing the first Google Play release (Ron approved the app, 23.11.2026). Ready in the repo: Pro via Play Billing
+(product `kanjilink_pro`, N5 free), signed release AAB (upload key sent to Ron, never committed), website + legal docs
+(`site/`, `docs/legal/`), store listing text and images (`store/en-US/`), and Ron's manual steps (`store/PLAY_CONSOLE_STEPS.md`).
+Waiting for Ron: contact email + Pro price, GitHub secrets (4 upload-key values + CLOUDFLARE_API_TOKEN), create the app in
+Play Console, first manual AAB upload, App content forms, the in-app product, draft-app permission for the service account.
+Then: deploy the site, upload the listing via the API (show Ron first), Internal testing draft.
 
 ## Decisions
 - Revert point for the v0.2 design polish: PR #5 (squash commit 08b0e0e). "Restore the previous design" = revert it.
@@ -26,6 +27,16 @@ back ("back in 10 min" / "back in 3 days"), a toast confirms it, and a kanji see
 - [x] Screens: onboarding, home, review session, settings, sources & licences (EDRDG duty)
 - [x] Tests: 5 logic + 3 screenshot (Robolectric), all green; release AAB builds with R8
 - [x] GitHub Actions: tests + debug APK + screenshots; signed AAB when secrets exist
+
+## Store release (v1.0)
+- [x] Upload key created (PKCS12, alias kanjilink-upload, SHA-256 12:29:A3:…:96:64); sent to Ron as a file, not in git
+- [x] Play Billing 8.3.0: one-time `kanjilink_pro`; free = N5 path; Pro = N4–N1; paywall, upgrade card, restore
+- [x] Website `site/` for kanjilink.vplusstudio.app (privacy, terms, accessibility) + `wrangler.jsonc` + deploy workflow
+- [x] Hebrew legal docs in `docs/legal/` (privacy, terms, cookies, accessibility) – [CONTACT_EMAIL] still a placeholder
+- [x] Store listing en-US (`store/en-US/listing.json`), icon 512, feature graphic, 6 screenshots (`tools/make_store_assets.py`)
+- [x] Signed release AAB builds locally (fixed lint: androidx.fragment 1.8.8)
+- [ ] Ron: email + price, secrets, Play Console steps (store/PLAY_CONSOLE_STEPS.md)
+- [ ] Deploy site, upload listing + images via API, Internal testing draft
 
 ## Next
 - [x] First test on Ron's phone: works (2026-11-23)

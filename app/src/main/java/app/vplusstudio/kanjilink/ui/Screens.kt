@@ -257,7 +257,7 @@ fun RevealOrAnswer(revealed: Boolean, preview: Pair<String, String>, onReveal: (
 }
 
 @Composable
-fun Onboarding(onStart: (level: Int, perDay: Int) -> Unit) {
+fun Onboarding(isPro: Boolean = false, onUpgrade: () -> Unit = {}, onStart: (level: Int, perDay: Int) -> Unit) {
     val level = remember { mutableIntStateOf(5) }
     val perDay = remember { mutableIntStateOf(5) }
     Page("Kanjilink") {
@@ -280,9 +280,11 @@ fun Onboarding(onStart: (level: Int, perDay: Int) -> Unit) {
         Panel {
             Text("Start at", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
-            ChipRow(listOf(5, 4, 3, 2, 1), level.intValue, { "N$it" }) { level.intValue = it }
+            ChipRow(listOf(5, 4, 3, 2, 1), level.intValue, { "N$it" }, locked = { !isPro && it != 5 }, onLocked = onUpgrade) {
+                level.intValue = it
+            }
             Text(
-                "N5 is the easiest. Not sure? Start at N5.",
+                if (isPro) "N5 is the easiest. Not sure? Start at N5." else "N5 (79 kanji) is free. N4 to N1 come with Kanjilink Pro.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -309,13 +311,26 @@ fun Onboarding(onStart: (level: Int, perDay: Int) -> Unit) {
 /** Wraps to a new line when chips do not fit (large system font sizes). */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ChipRow(values: List<Int>, selected: Int, label: (Int) -> String, onSelect: (Int) -> Unit) {
+fun ChipRow(
+    values: List<Int>,
+    selected: Int,
+    label: (Int) -> String,
+    locked: (Int) -> Boolean = { false },
+    onLocked: () -> Unit = {},
+    onSelect: (Int) -> Unit,
+) {
     FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         values.forEach { v ->
+            val isLocked = locked(v)
             FilterChip(
                 selected = v == selected,
-                onClick = { onSelect(v) },
-                label = { Text(label(v), fontWeight = if (v == selected) FontWeight.Bold else FontWeight.Normal) },
+                onClick = { if (isLocked) onLocked() else onSelect(v) },
+                label = {
+                    Text(
+                        if (isLocked) "${label(v)} · Pro" else label(v),
+                        fontWeight = if (v == selected) FontWeight.Bold else FontWeight.Normal,
+                    )
+                },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = MaterialTheme.colorScheme.primary,
                     selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
@@ -338,6 +353,9 @@ fun Home(
     onReview: () -> Unit,
     onSettings: () -> Unit,
     onLockToggle: (Boolean) -> Unit,
+    isPro: Boolean = true,
+    freeLevelDone: Boolean = false,
+    onUpgrade: () -> Unit = {},
 ) {
     Page(
         "Kanjilink",
@@ -378,6 +396,10 @@ fun Home(
                 Text("Review ${stats.due} due", fontWeight = FontWeight.Bold)
             }
         }
+        if (!isPro) {
+            Spacer(Modifier.height(20.dp))
+            UpgradeCard(freeLevelDone, onUpgrade)
+        }
         Spacer(Modifier.height(20.dp))
         Panel(tinted = true) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -400,6 +422,94 @@ fun Home(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 4.dp),
         )
+    }
+}
+
+@Composable
+private fun UpgradeCard(freeLevelDone: Boolean, onUpgrade: () -> Unit) {
+    Card(
+        Modifier.fillMaxWidth(),
+        shape = CardShape,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+    ) {
+        Column(Modifier.padding(20.dp)) {
+            Text(
+                if (freeLevelDone) "You have met all 79 N5 kanji!" else "Ready for more than N5?",
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Kanjilink Pro unlocks N4, N3, N2 and N1: 2,132 more kanji. One payment, no subscription.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            Spacer(Modifier.height(12.dp))
+            Button(onClick = onUpgrade, modifier = Modifier.heightIn(min = 48.dp)) { Text("See Kanjilink Pro", fontWeight = FontWeight.Bold) }
+        }
+    }
+}
+
+/** The Pro purchase screen. Google Play shows the real price and handles payment, VAT and receipts. */
+@Composable
+fun Paywall(
+    isPro: Boolean,
+    price: String?,
+    available: Boolean,
+    onBuy: () -> Unit,
+    onRestore: () -> Unit,
+    onBack: () -> Unit,
+) {
+    Page("Kanjilink Pro", onBack = onBack) {
+        Panel {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                AppMark(64.dp)
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    if (isPro) "Pro is unlocked. Thank you!" else "Learn every JLPT kanji",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            Benefit("All 2,211 kanji: JLPT N4, N3, N2 and N1, on top of the free N5")
+            Benefit("Start at any level, on the lock screen, widget and notifications")
+            Benefit("One payment. No subscription, no ads, no account")
+            Benefit("Your progress stays on your phone")
+        }
+        Spacer(Modifier.height(20.dp))
+        if (!isPro) {
+            Button(
+                onClick = onBuy,
+                enabled = available && price != null,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            ) {
+                Text(if (price != null) "Unlock Pro · $price" else "Unlock Pro", fontWeight = FontWeight.Bold)
+            }
+            if (!available || price == null) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Purchases work in the version installed from Google Play.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            TextButton(onClick = onRestore, modifier = Modifier.fillMaxWidth()) { Text("Restore purchase", fontWeight = FontWeight.Bold) }
+        } else {
+            Button(onClick = onBack, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Continue", fontWeight = FontWeight.Bold) }
+        }
+    }
+}
+
+@Composable
+private fun Benefit(text: String) {
+    Row(Modifier.padding(vertical = 6.dp), verticalAlignment = Alignment.Top) {
+        Text("✓", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, modifier = Modifier.width(28.dp))
+        Text(text)
     }
 }
 
@@ -470,6 +580,7 @@ data class SettingsState(
     val startLevel: Int,
     val newPerDay: Int,
     val kanjiStyle: Int = 0,
+    val isPro: Boolean = true,
 )
 
 @Composable
@@ -478,6 +589,7 @@ fun Settings(
     onChange: (SettingsState) -> Unit,
     onAbout: () -> Unit,
     onBack: () -> Unit,
+    onUpgrade: () -> Unit = {},
 ) {
     Page("Settings", onBack = onBack) {
         Section("Notifications") {
@@ -513,11 +625,14 @@ fun Settings(
         }
         Section("Study") {
             Label("Study path starts at")
-            ChipRow(listOf(5, 4, 3, 2, 1), s.startLevel, { "N$it" }) { onChange(s.copy(startLevel = it)) }
+            ChipRow(listOf(5, 4, 3, 2, 1), s.startLevel, { "N$it" }, locked = { !s.isPro && it != 5 }, onLocked = onUpgrade) {
+                onChange(s.copy(startLevel = it))
+            }
             Label("New kanji per day")
             ChipRow(listOf(3, 5, 10, 15), s.newPerDay, { "$it" }) { onChange(s.copy(newPerDay = it)) }
         }
         Section("About") {
+            if (!s.isPro) TextButton(onClick = onUpgrade) { Text("Kanjilink Pro", fontWeight = FontWeight.Bold) }
             TextButton(onClick = onAbout) { Text("Sources & licences", fontWeight = FontWeight.Bold) }
         }
     }
@@ -605,6 +720,8 @@ fun About(dataVersion: String, appVersion: String, onBack: () -> Unit) {
             }
             Spacer(Modifier.height(12.dp))
             Text("Privacy: no account, no ads, no tracking. Your progress is stored only on this phone.")
+            LinkButton("Privacy policy") { uri.openUri("https://kanjilink.vplusstudio.app/privacy") }
+            LinkButton("Terms of use") { uri.openUri("https://kanjilink.vplusstudio.app/terms") }
         }
         Spacer(Modifier.height(16.dp))
         Panel {

@@ -50,6 +50,11 @@ class Prefs(context: Context) {
         get() = p.getInt("kanjiStyle", 0)
         set(v) = p.edit().putInt("kanjiStyle", v).apply()
 
+    /** Pro unlocked (one-time purchase). Cached; Google Play is the source of truth at every start. */
+    var isPro: Boolean
+        get() = p.getBoolean("isPro", false)
+        set(v) = p.edit().putBoolean("isPro", v).apply()
+
     var currentKanji: String?
         get() = p.getString("currentKanji", null)
         set(v) = p.edit().putString("currentKanji", v).apply()
