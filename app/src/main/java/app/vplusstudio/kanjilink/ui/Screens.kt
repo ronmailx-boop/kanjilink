@@ -1,6 +1,8 @@
 package app.vplusstudio.kanjilink.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +33,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.LocaleList
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.vplusstudio.kanjilink.data.Kanji
@@ -60,6 +63,8 @@ fun Page(
                 if (onBack != null) TextButton(onClick = onBack) { Text("← Back") }
                 Text(
                     title,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f).padding(start = if (onBack == null) 4.dp else 0.dp),
@@ -164,9 +169,11 @@ fun Onboarding(onStart: (level: Int, perDay: Int) -> Unit) {
     }
 }
 
+/** Wraps to a new line when chips do not fit (large system font sizes). */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ChipRow(values: List<Int>, selected: Int, label: (Int) -> String, onSelect: (Int) -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         values.forEach { v -> FilterChip(selected = v == selected, onClick = { onSelect(v) }, label = { Text(label(v)) }) }
     }
 }

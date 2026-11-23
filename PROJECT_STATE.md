@@ -1,8 +1,9 @@
 # Kanjilink: Project State
 
 ## Current Focus
-MVP v0.1 built and tested in the cloud (Robolectric). Next: Ron installs the debug APK from GitHub Actions
-on his phone and checks the lock screen, widget and notifications on a real device.
+v0.1 runs on Ron's phone (debug APK from Actions): "everything works". Fixed from his screenshots: chips cut
+off with a large system font (now wrap), and the English UI was mirrored on a Hebrew phone (now forced LTR).
+Next: Pro unlock (Play Billing) and Play Console preparation.
 
 ## Decisions
 - Name **Kanjilink**, package `app.vplusstudio.kanjilink` (permanent once created in Play).
@@ -24,7 +25,9 @@ on his phone and checks the lock screen, widget and notifications on a real devi
 - [x] GitHub Actions: tests + debug APK + screenshots; signed AAB when secrets exist
 
 ## Next
-- [ ] Test on a real phone (Samsung/Xiaomi lock screen, notification look, widget)
+- [x] First test on Ron's phone: works (2026-11-23)
+- [x] Fix: chip rows wrap (large font); UI forced LTR on RTL phones; one-line page titles
+- [ ] More device checks (Samsung/Xiaomi lock screen, widget)
 - [ ] Pro unlock via Play Billing (decide: one-time vs subscription; suggested free = N5)
 - [ ] Upload key + repo secrets (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD)
 - [ ] Create the app in Play Console, first manual AAB upload to Internal testing
