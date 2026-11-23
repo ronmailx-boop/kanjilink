@@ -1,9 +1,22 @@
 # Kanjilink: Project State
 
 ## Current Focus
-Play: app created, internal test live (v2), store listing + images + contact details + Pro product (`kanjilink_pro`, $4.99,
-active) set via API. Waiting for Ron: the App content forms and License testing, then a test purchase from the internal
-test, then Production (Ron). Next code step if needed: Hebrew/other store translations.
+**Stopped at (23.11.2026):** v3 (0.1.0, versionCode 3) sent by Ron from Play Console to **Production review**
+(177 countries + rest of world, managed publishing off = goes live automatically when approved). Everything else in
+Play is done: listing, images, contact details, `kanjilink_pro` active ($4.99), App content forms, internal test v3,
+test purchase OK.
+
+**Next steps:**
+1. Wait for Google's review e-mail. If rejected: read the reason and fix (app access uses the review code; the code is
+   only in Play Console's App access form and in Ron's file `kanjilink-review-code.txt`).
+2. Small follow-up release: upload native debug symbols (Play warning) – add
+   `ndk { debugSymbolLevel = "FULL" }` under `defaultConfig` / release in `app/build.gradle.kts`.
+3. After launch: marketing with Buzz Builder (store listing translations ES/PT/FR/DE, promo video, posts).
+4. Later features: stroke order (KanjiVG), example words (JMdict), translated meanings.
+
+**How releases work:** push to `main` → GitHub Actions "Android build" builds a signed AAB (`kanjilink-release-aab`
+artifact, versionCode = run number). Upload to Internal testing with the `vplus-publishing` skill
+(`play_upload.py`, draft) after Ron approves; Ron promotes to Production in Play Console.
 
 ## Decisions
 - Revert point for the v0.2 design polish: PR #5 (squash commit 08b0e0e). "Restore the previous design" = revert it.
@@ -38,8 +51,9 @@ test, then Production (Ron). Next code step if needed: Hebrew/other store transl
 - [x] Via API (approved 23.11.2026): en-US listing text, icon, feature graphic, 6 screenshots (verified identical);
       contact email vplusstudio.app@gmail.com, website https://vplusstudio.app;
       one-time product `kanjilink_pro` ACTIVE, $4.99 with Google's regional conversion (regions version 2026/01)
-- [ ] Ron: App content forms (privacy URL, app access, ads, content rating, target audience, data safety, etc.)
-- [ ] Ron: License testing (his Gmail) to test the Pro purchase for free; install from the internal test link
+- [x] versionCode 3 (review code) rolled out to Internal testing; test purchase of Pro worked on Ron's phone (23.11.2026)
+- [x] Ron filled the App content forms (app access with review code, content rating, target audience 13+, ads,
+      data safety, privacy, business status + terms URL) – the API cannot read them; check the Dashboard
 - [ ] Ron: promote to Production when ready (API has no Production permission)
 
 ## Next
