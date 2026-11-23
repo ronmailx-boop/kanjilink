@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Kanjilink</string>
+    <string name="widget_name">Kanjilink kanji</string>
+    <string name="widget_description">The current kanji with its meaning and readings</string>
+    <string name="channel_name">Kanji of the moment</string>
+    <string name="channel_desc">A new kanji every few hours</string>
+    <string name="again">Again</string>
+    <string name="know_it">I know it</string>
+    <string name="wallpaper_failed">This phone did not accept a lock-screen wallpaper. Notifications and the widget still work.</string>
+</resources>
