@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
-    private enum class Screen { Onboarding, Home, Review, Settings, About }
+    private enum class Screen { Onboarding, Home, Review, Settings, About, Paywall }
 
     private lateinit var prefs: Prefs
     private var screen by mutableStateOf(Screen.Home)
@@ -45,6 +45,10 @@ class MainActivity : ComponentActivity() {
     private var homePreview by mutableStateOf("10 min" to "1 day")
     private var reviewPreview by mutableStateOf("10 min" to "1 day")
     private var settings by mutableStateOf<SettingsState?>(null)
+    private var billingState by mutableStateOf(app.vplusstudio.kanjilink.billing.Billing.State(isPro = false))
+    private var freeLevelDone by mutableStateOf(false)
+    private var paywallReturn = Screen.Home
+    private lateinit var billing: app.vplusstudio.kanjilink.billing.Billing
 
     private val notificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -59,6 +63,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         prefs = Prefs(this)
         app.vplusstudio.kanjilink.ui.KanjiFontState.style = prefs.kanjiStyle
+        billing = app.vplusstudio.kanjilink.billing.Billing(this) { st -> onBilling(st) }
+        billingState = billing.state
+        billing.start()
         screen = if (prefs.onboarded) Screen.Home else Screen.Onboarding
         loadSettings()
         refresh()
@@ -66,11 +73,26 @@ class MainActivity : ComponentActivity() {
         setContent {
             KanjilinkTheme {
                 BackHandler(enabled = screen != Screen.Home && screen != Screen.Onboarding) {
-                    screen = if (screen == Screen.About) Screen.Settings else Screen.Home
+                    screen = when (screen) {
+                        Screen.About -> Screen.Settings
+                        Screen.Paywall -> paywallReturn
+                        else -> Screen.Home
+                    }
                     refresh()
                 }
                 when (screen) {
-                    Screen.Onboarding -> Onboarding { level, perDay -> finishOnboarding(level, perDay) }
+                    Screen.Onboarding -> Onboarding(
+                        isPro = billingState.isPro,
+                        onUpgrade = { openPaywall() },
+                    ) { level, perDay -> finishOnboarding(level, perDay) }
+                    Screen.Paywall -> app.vplusstudio.kanjilink.ui.Paywall(
+                        isPro = billingState.isPro,
+                        price = billingState.price,
+                        available = billingState.available,
+                        onBuy = { if (!billing.buy(this)) toast("Google Play is not ready. Please try again in a moment.") },
+                        onRestore = { billing.refreshPurchases(); toast("Checking your purchases…") },
+                        onBack = { screen = paywallReturn; refresh() },
+                    )
                     Screen.Home -> current?.let { k ->
                         Home(
                             current = k,
@@ -84,6 +106,9 @@ class MainActivity : ComponentActivity() {
                             onReview = { startReview() },
                             onSettings = { screen = Screen.Settings },
                             onLockToggle = { on -> settings?.let { applySettings(it.copy(lockOn = on)) } },
+                            isPro = billingState.isPro,
+                            freeLevelDone = freeLevelDone,
+                            onUpgrade = { openPaywall() },
                         )
                     }
                     Screen.Review -> Review(
@@ -102,6 +127,7 @@ class MainActivity : ComponentActivity() {
                             onChange = { applySettings(it) },
                             onAbout = { screen = Screen.About },
                             onBack = { screen = Screen.Home; refresh() },
+                            onUpgrade = { openPaywall() },
                         )
                     }
                     Screen.About -> About(
@@ -110,6 +136,35 @@ class MainActivity : ComponentActivity() {
                         onBack = { screen = Screen.Settings },
                     )
                 }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        billing.end()
+        super.onDestroy()
+    }
+
+    private fun openPaywall() {
+        paywallReturn = if (screen == Screen.Paywall) paywallReturn else screen
+        screen = Screen.Paywall
+    }
+
+    private fun toast(text: String) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()
+
+    /** Google Play reported a change: Pro unlocked/restored/refunded, a price, or a message. */
+    private fun onBilling(st: app.vplusstudio.kanjilink.billing.Billing.State) {
+        val proChanged = st.isPro != billingState.isPro
+        billingState = st
+        st.message?.let { toast(it); billing.clearMessage() }
+        if (proChanged) {
+            prefs.currentKanji = null
+            if (!st.isPro) prefs.startLevel = Study.FREE_LEVEL
+            loadSettings()
+            lifecycleScope.launch(Dispatchers.IO) {
+                val k = Study.current(this@MainActivity)
+                Outputs.refreshAll(this@MainActivity, k, notify = false)
+                withContext(Dispatchers.Main) { refresh() }
             }
         }
     }
@@ -124,6 +179,7 @@ class MainActivity : ComponentActivity() {
             val ctx = this@MainActivity
             val (k, s) = withContext(Dispatchers.IO) { Study.current(ctx) to Study.stats(ctx) }
             val (isNew, preview) = withContext(Dispatchers.IO) { Study.isNew(ctx, k.char) to Study.preview(ctx, k.char) }
+            freeLevelDone = withContext(Dispatchers.IO) { Study.freeLevelComplete(ctx) }
             // A new kanji is shown in full; one seen before starts hidden as a small self-test.
             if (k.char != current?.char) homeRevealed = isNew
             current = k
@@ -191,6 +247,7 @@ class MainActivity : ComponentActivity() {
             startLevel = prefs.startLevel,
             newPerDay = prefs.newPerDay,
             kanjiStyle = prefs.kanjiStyle,
+            isPro = prefs.isPro,
         )
     }
 

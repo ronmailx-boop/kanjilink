@@ -165,6 +165,28 @@ class ScreenshotTest {
     }
 
     @Test
+    fun paywallAndFreeHome() {
+        compose.setContent {
+            KanjilinkTheme {
+                app.vplusstudio.kanjilink.ui.Paywall(isPro = false, price = "€4.99", available = true, {}, {}, {})
+            }
+        }
+        capture("paywall")
+    }
+
+    @Test
+    fun homeFree() {
+        val k = KanjiRepository.all(ctx).first { it.char == "学" }
+        compose.setContent {
+            KanjilinkTheme {
+                Home(k, Study.Stats(5, 79, 79, 0, 0, 9), lockOn = true, revealed = true, isNew = false,
+                    preview = "10 min" to "3 days", {}, {}, {}, {}, {}, isPro = false, freeLevelDone = true)
+            }
+        }
+        capture("home-free")
+    }
+
+    @Test
     fun home() {
         val k = KanjiRepository.all(ctx).first { it.char == "学" }
         compose.setContent {

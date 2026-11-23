@@ -61,10 +61,27 @@ object Study {
     /** learned/total are for the level being studied now (for example N5: 12/79). */
     data class Stats(val level: Int, val learned: Int, val total: Int, val due: Int, val newToday: Int, val streak: Int)
 
+    /** Free: JLPT N5 (79 kanji). Pro: the whole path from the chosen start level to N1. */
+    const val FREE_LEVEL = 5
+
+    fun studyPath(context: Context, prefs: Prefs = Prefs(context)): List<Kanji> {
+        val path = KanjiRepository.path(context, if (prefs.isPro) prefs.startLevel else FREE_LEVEL)
+        return if (prefs.isPro) path else path.filter { it.level == FREE_LEVEL }
+    }
+
+    /** True when a free user has met every N5 kanji: time to offer Pro. */
+    @Synchronized
+    fun freeLevelComplete(context: Context): Boolean {
+        val prefs = Prefs(context)
+        if (prefs.isPro) return false
+        val cards = cards(context)
+        return studyPath(context, prefs).all { cards.containsKey(it.char) }
+    }
+
     @Synchronized
     fun stats(context: Context): Stats {
         val prefs = Prefs(context)
-        val path = KanjiRepository.path(context, prefs.startLevel)
+        val path = studyPath(context, prefs)
         val cards = cards(context)
         val now = System.currentTimeMillis()
         val level = path.firstOrNull { !cards.containsKey(it.char) }?.level ?: path.last().level
@@ -91,7 +108,7 @@ object Study {
     @Synchronized
     fun advance(context: Context): Kanji {
         val prefs = Prefs(context)
-        val path = KanjiRepository.path(context, prefs.startLevel)
+        val path = studyPath(context, prefs)
         val cards = cards(context)
         val now = System.currentTimeMillis()
         val previous = prefs.currentKanji
@@ -171,7 +188,7 @@ object Study {
         val prefs = Prefs(context)
         val cards = cards(context)
         val now = System.currentTimeMillis()
-        return KanjiRepository.path(context, prefs.startLevel)
+        return studyPath(context, prefs)
             .mapNotNull { k -> cards[k.char]?.takeIf { it.due <= now }?.let { k to it.due } }
             .sortedBy { it.second }
             .map { it.first }

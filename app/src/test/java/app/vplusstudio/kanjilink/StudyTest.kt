@@ -91,6 +91,33 @@ class StudyTest {
     }
 
     @Test
+    fun freeUsersStudyN5OnlyProGetsEverything() {
+        val p = Prefs(ctx)
+        p.isPro = false
+        p.startLevel = 3 // ignored when not Pro
+        assertEquals(79, Study.studyPath(ctx).size)
+        assertTrue(Study.studyPath(ctx).all { it.level == 5 })
+        p.isPro = true
+        p.startLevel = 5
+        assertEquals(2211, Study.studyPath(ctx).size)
+        p.startLevel = 3
+        assertEquals(367 + 367 + 1232, Study.studyPath(ctx).size)
+        p.isPro = false
+        p.startLevel = 5
+    }
+
+    @Test
+    fun freeLevelCompleteAfterAllN5() {
+        val p = Prefs(ctx).apply { isPro = false; newPerDay = 200 }
+        assertTrue(!Study.freeLevelComplete(ctx))
+        repeat(79) { Study.advance(ctx) }
+        assertTrue(Study.freeLevelComplete(ctx))
+        p.isPro = true
+        assertTrue(!Study.freeLevelComplete(ctx))
+        p.isPro = false
+    }
+
+    @Test
     fun kanjiStyleDefaultsToSans() {
         assertEquals(0, Prefs(ctx).kanjiStyle)
     }
