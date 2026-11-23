@@ -53,6 +53,27 @@ class ScreenshotTest {
         capture("onboarding")
     }
 
+    /** Ron's phone: Hebrew locale, large font, dark mode. Chips must wrap, text must stay LTR. */
+    @Test
+    @Config(qualifiers = "iw-ldrtl-w240dp-h891dp-night-xxhdpi", fontScale = 1.6f)
+    fun settingsHebrewPhoneLargeFont() {
+        compose.setContent {
+            KanjilinkTheme {
+                app.vplusstudio.kanjilink.ui.Settings(
+                    app.vplusstudio.kanjilink.ui.SettingsState(true, 3, 22, 8, true, 0, 5, 5), {}, {}, {},
+                )
+            }
+        }
+        capture("settings-he-large-font")
+    }
+
+    @Test
+    @Config(qualifiers = "iw-ldrtl-w411dp-h891dp-night-xxhdpi", fontScale = 1.6f)
+    fun onboardingHebrewPhoneLargeFont() {
+        compose.setContent { KanjilinkTheme { Onboarding { _, _ -> } } }
+        capture("onboarding-he-large-font")
+    }
+
     @Test
     fun home() {
         val k = KanjiRepository.all(ctx).first { it.char == "学" }
