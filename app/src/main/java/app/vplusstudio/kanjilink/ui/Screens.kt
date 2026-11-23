@@ -720,6 +720,8 @@ fun About(dataVersion: String, appVersion: String, onBack: () -> Unit) {
             }
             Spacer(Modifier.height(12.dp))
             Text("Privacy: no account, no ads, no tracking. Your progress is stored only on this phone.")
+            LinkButton("Privacy policy") { uri.openUri("https://kanjilink.vplusstudio.app/privacy") }
+            LinkButton("Terms of use") { uri.openUri("https://kanjilink.vplusstudio.app/terms") }
         }
         Spacer(Modifier.height(16.dp))
         Panel {
