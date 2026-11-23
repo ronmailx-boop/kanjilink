@@ -58,6 +58,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         prefs = Prefs(this)
+        app.vplusstudio.kanjilink.ui.KanjiFontState.style = prefs.kanjiStyle
         screen = if (prefs.onboarded) Screen.Home else Screen.Onboarding
         loadSettings()
         refresh()
@@ -189,6 +190,7 @@ class MainActivity : ComponentActivity() {
             theme = prefs.wallpaperTheme,
             startLevel = prefs.startLevel,
             newPerDay = prefs.newPerDay,
+            kanjiStyle = prefs.kanjiStyle,
         )
     }
 
@@ -202,6 +204,8 @@ class MainActivity : ComponentActivity() {
         prefs.wallpaperTheme = new.theme
         prefs.startLevel = new.startLevel
         prefs.newPerDay = new.newPerDay
+        prefs.kanjiStyle = new.kanjiStyle
+        app.vplusstudio.kanjilink.ui.KanjiFontState.style = new.kanjiStyle
         settings = new
 
         if (new.notificationsOn && !old.notificationsOn && Build.VERSION.SDK_INT >= 33) {
@@ -212,7 +216,7 @@ class MainActivity : ComponentActivity() {
         if (new.startLevel != old.startLevel) prefs.currentKanji = null
 
         val wallpaperChanged = (new.lockOn && !old.lockOn) || (new.lockOn && new.theme != old.theme) ||
-            new.startLevel != old.startLevel
+            new.startLevel != old.startLevel || new.kanjiStyle != old.kanjiStyle
         if (wallpaperChanged) {
             lifecycleScope.launch {
                 val ok = withContext(Dispatchers.IO) {

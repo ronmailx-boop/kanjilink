@@ -45,6 +45,11 @@ class Prefs(context: Context) {
         get() = p.getInt("wallpaperTheme", 0)
         set(v) = p.edit().putInt("wallpaperTheme", v).apply()
 
+    /** Kanji typeface: 0 = Sans (gothic, default, closest to handwriting), 1 = Serif (mincho, book style). */
+    var kanjiStyle: Int
+        get() = p.getInt("kanjiStyle", 0)
+        set(v) = p.edit().putInt("kanjiStyle", v).apply()
+
     var currentKanji: String?
         get() = p.getString("currentKanji", null)
         set(v) = p.edit().putString("currentKanji", v).apply()

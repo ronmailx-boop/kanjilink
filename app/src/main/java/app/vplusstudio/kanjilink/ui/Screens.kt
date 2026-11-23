@@ -41,6 +41,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,12 +63,23 @@ import app.vplusstudio.kanjilink.data.Kanji
 import app.vplusstudio.kanjilink.data.Study
 import app.vplusstudio.kanjilink.work.KanjiRenderer
 
-/** Noto Serif JP Bold, bundled for the app's kanji (SIL OFL 1.1). */
-val KanjiFont = FontFamily(Font(R.font.noto_serif_jp_bold, FontWeight.Bold))
+/** Bundled kanji fonts (SIL OFL 1.1): Noto Sans JP (default) and Noto Serif JP. */
+private val SansKanji = FontFamily(Font(R.font.noto_sans_jp_bold, FontWeight.Bold))
+private val SerifKanji = FontFamily(Font(R.font.noto_serif_jp_bold, FontWeight.Bold))
+val KanjiStyleNames = listOf("Sans", "Serif")
+
+/** The chosen kanji style, shared by every screen (set from Prefs in MainActivity). */
+object KanjiFontState {
+    var style by androidx.compose.runtime.mutableIntStateOf(0)
+}
 
 /** Japanese glyph shapes for kana, whatever the phone's language. */
 private val JaStyle = TextStyle(localeList = LocaleList("ja"))
-private val KanjiStyle = TextStyle(fontFamily = KanjiFont, fontWeight = FontWeight.Bold, localeList = LocaleList("ja"))
+/** The app mark always uses the serif 字, like the launcher icon. */
+private val MarkStyle = TextStyle(fontFamily = SerifKanji, fontWeight = FontWeight.Bold, localeList = LocaleList("ja"))
+
+private fun kanjiStyle(style: Int = KanjiFontState.style) =
+    TextStyle(fontFamily = if (style == 1) SerifKanji else SansKanji, fontWeight = FontWeight.Bold, localeList = LocaleList("ja"))
 
 private val CardShape = RoundedCornerShape(24.dp)
 
@@ -80,7 +93,7 @@ fun AppMark(size: Dp) {
             .background(MaterialTheme.colorScheme.primary),
         contentAlignment = Alignment.Center,
     ) {
-        Text("字", style = KanjiStyle.copy(fontSize = (size.value * 0.56f).sp, lineHeight = (size.value * 0.6f).sp), color = Paper)
+        Text("字", style = MarkStyle.copy(fontSize = (size.value * 0.56f).sp, lineHeight = (size.value * 0.6f).sp), color = Paper)
     }
 }
 
@@ -158,7 +171,7 @@ fun KanjiCard(k: Kanji, reveal: Boolean = true) {
             LevelPill("JLPT N${k.level} · ${k.strokes} ${if (k.strokes == 1) "stroke" else "strokes"}")
             Text(
                 k.char,
-                style = KanjiStyle.copy(fontSize = 132.sp, lineHeight = 150.sp),
+                style = kanjiStyle().copy(fontSize = 132.sp, lineHeight = 150.sp),
                 modifier = Modifier.padding(vertical = 8.dp),
             )
             if (!reveal) {
@@ -456,6 +469,7 @@ data class SettingsState(
     val theme: Int,
     val startLevel: Int,
     val newPerDay: Int,
+    val kanjiStyle: Int = 0,
 )
 
 @Composable
@@ -486,6 +500,17 @@ fun Settings(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        Section("Kanji style") {
+            Text(
+                "Sans is clean and closest to handwriting, good for counting strokes. Serif looks like a printed book.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(12.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                KanjiStyleNames.forEachIndexed { i, name -> StyleOption(name, i, selected = s.kanjiStyle == i, Modifier.weight(1f)) { onChange(s.copy(kanjiStyle = i)) } }
+            }
+        }
         Section("Study") {
             Label("Study path starts at")
             ChipRow(listOf(5, 4, 3, 2, 1), s.startLevel, { "N$it" }) { onChange(s.copy(startLevel = it)) }
@@ -494,6 +519,24 @@ fun Settings(
         }
         Section("About") {
             TextButton(onClick = onAbout) { Text("Sources & licences", fontWeight = FontWeight.Bold) }
+        }
+    }
+}
+
+/** A tappable sample: 国 in the style, with its name. */
+@Composable
+private fun StyleOption(name: String, style: Int, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    androidx.compose.material3.Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = if (selected) colors.secondaryContainer else colors.surface,
+        border = BorderStroke(if (selected) 2.dp else 1.dp, if (selected) colors.primary else colors.outlineVariant),
+    ) {
+        Column(Modifier.padding(vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("国学", style = kanjiStyle(style).copy(fontSize = 34.sp, lineHeight = 40.sp))
+            Text(name, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
         }
     }
 }
@@ -586,7 +629,7 @@ fun About(dataVersion: String, appVersion: String, onBack: () -> Unit) {
         }
         Spacer(Modifier.height(16.dp))
         Panel {
-            Text("Kanji are set in Noto Serif JP (SIL Open Font License 1.1). Icons: Material Icons (Apache 2.0).")
+            Text("Kanji are set in Noto Sans JP and Noto Serif JP (SIL Open Font License 1.1). Icons: Material Icons (Apache 2.0).")
             LinkButton("Noto CJK fonts") { uri.openUri("https://github.com/notofonts/noto-cjk") }
         }
     }

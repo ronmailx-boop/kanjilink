@@ -91,6 +91,11 @@ class StudyTest {
     }
 
     @Test
+    fun kanjiStyleDefaultsToSans() {
+        assertEquals(0, Prefs(ctx).kanjiStyle)
+    }
+
+    @Test
     fun quietHoursWrapMidnight() {
         val p = Prefs(ctx).apply { quietStart = 22; quietEnd = 8 }
         assertTrue(p.isQuietHour(23))
