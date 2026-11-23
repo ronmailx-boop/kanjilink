@@ -89,7 +89,7 @@ object Outputs {
         val dm = context.resources.displayMetrics
         val w = minOf(dm.widthPixels, dm.heightPixels)
         val h = maxOf(dm.widthPixels, dm.heightPixels)
-        val bmp = KanjiRenderer.wallpaper(k, w, h, Prefs(context).wallpaperTheme)
+        val bmp = KanjiRenderer.wallpaper(k, w, h, Prefs(context).wallpaperTheme, KanjiRenderer.kanjiTypeface(context))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             wm.setBitmap(bmp, null, true, WallpaperManager.FLAG_LOCK)
         } else {

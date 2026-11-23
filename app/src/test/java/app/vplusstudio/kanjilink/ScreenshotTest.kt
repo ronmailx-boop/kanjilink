@@ -44,7 +44,42 @@ class ScreenshotTest {
     @Test
     fun wallpapers() {
         val k = KanjiRepository.all(ctx).first { it.char == "学" }
-        KanjiRenderer.paletteNames.forEachIndexed { i, n -> save(KanjiRenderer.wallpaper(k, 1080, 2340, i), "wallpaper-$n") }
+        KanjiRenderer.paletteNames.forEachIndexed { i, n -> save(KanjiRenderer.wallpaper(k, 1080, 2340, i, KanjiRenderer.kanjiTypeface(ctx)), "wallpaper-$n") }
+    }
+
+    /** Launcher icon (circle mask) and both widget sizes, light and dark. */
+    @Test
+    fun iconAndWidgets() = renderIconAndWidgets("light")
+
+    @Test
+    @Config(qualifiers = "w411dp-h891dp-night-xxhdpi")
+    fun iconAndWidgetsNight() = renderIconAndWidgets("night")
+
+    private fun renderIconAndWidgets(tag: String) {
+        val icon = ctx.getDrawable(R.mipmap.ic_launcher)!!
+        val ib = Bitmap.createBitmap(432, 432, Bitmap.Config.ARGB_8888)
+        val ic = Canvas(ib)
+        val path = android.graphics.Path().apply { addCircle(216f, 216f, 216f, android.graphics.Path.Direction.CW) }
+        ic.clipPath(path)
+        icon.setBounds(0, 0, 432, 432)
+        icon.draw(ic)
+        save(ib, "icon")
+
+        val k = KanjiRepository.all(ctx).first { it.char == "学" }
+        Study.answer(ctx, k.char, true)
+        app.vplusstudio.kanjilink.data.Prefs(ctx).currentKanji = k.char
+        for ((name, wide, wDp) in listOf(Triple("small", false, 170), Triple("wide", true, 340))) {
+            val rv = app.vplusstudio.kanjilink.widget.KanjiWidgetProvider.build(ctx, k, wide)
+            val parent = android.widget.FrameLayout(ctx)
+            val v = rv.apply(ctx, parent)
+            val d = ctx.resources.displayMetrics.density
+            val w = (wDp * d).toInt(); val h = (170 * d).toInt()
+            v.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))
+            v.layout(0, 0, w, h)
+            val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+            v.draw(Canvas(b))
+            save(b, "widget-$name-$tag")
+        }
     }
 
     @Test

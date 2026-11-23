@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 字 from Noto Serif JP Bold (SIL OFL 1.1), centred in the adaptive-icon safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-    <group android:translateX="30" android:translateY="30">
-        <path android:fillColor="#FFF4F1EA" android:pathData="M22,4h4v4h14v8h-4v-4H12v4H8V8h14z" />
-        <path android:fillColor="#FFF4F1EA" android:pathData="M14,18h18l-6,6v4h12v4H26v8c0,2.2 -1.8,4 -4,4h-4v-4h4v-8H10v-4h12v-5.6L26.4,22H14z" />
-    </group>
+    <path android:fillColor="#FFF7F3EA" android:pathData="M51.22 52.36V57.55H34.34L34.68 58.78H51.22V67.75C51.22 68.3 50.96 68.52 50.24 68.52C49.22 68.52 43.39 68.18 43.39 68.18V68.73C46.03 69.15 47.09 69.71 47.99 70.47C48.84 71.24 49.09 72.38 49.3 74C55.47 73.45 56.36 71.49 56.36 68.01V58.78H72.43C73.02 58.78 73.49 58.57 73.62 58.1C71.75 56.44 68.73 54.02 68.73 54.02L66.01 57.55H56.36V54.02C57.29 53.89 57.72 53.55 57.85 52.92L57.51 52.87C60.27 51.77 63.03 50.24 65.24 48.84C66.14 48.75 66.6 48.67 66.94 48.28L62.31 44.24L59.59 46.96H41.95L42.29 48.16H59.29C58.31 49.6 56.87 51.34 55.47 52.7ZM39.31 37.44C39.44 39.87 37.78 42.29 36.38 43.22C35.02 43.99 34.17 45.31 34.81 46.88C35.53 48.58 37.87 48.88 39.14 47.77C40.38 46.71 41.18 44.71 40.97 41.95H66.69C66.22 43.35 65.58 45.05 65.03 46.2L65.41 46.5C67.54 45.65 70.34 44.12 71.96 42.93C72.85 42.84 73.28 42.76 73.66 42.42L69.15 38.12L66.56 40.72H56.36V35.74C57.51 35.53 57.85 35.11 57.89 34.51L51.22 34V40.72H40.84C40.63 39.7 40.33 38.63 39.87 37.44Z" />
 </vector>

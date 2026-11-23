@@ -38,6 +38,7 @@ class MainActivity : ComponentActivity() {
     private var current by mutableStateOf<Kanji?>(null)
     private var stats by mutableStateOf(Study.Stats(5, 0, 0, 0, 0, 0))
     private var reviewQueue by mutableStateOf<List<Kanji>>(emptyList())
+    private var reviewTotal by mutableStateOf(0)
     private var revealed by mutableStateOf(false)
     private var homeRevealed by mutableStateOf(true)
     private var currentIsNew by mutableStateOf(true)
@@ -92,6 +93,7 @@ class MainActivity : ComponentActivity() {
                         onReveal = { revealed = true },
                         onAnswer = { known -> reviewQueue.firstOrNull()?.let { answer(it, known, advance = false) } },
                         onBack = { screen = Screen.Home; refresh() },
+                        total = reviewTotal,
                     )
                     Screen.Settings -> settings?.let { s ->
                         Settings(
@@ -170,6 +172,7 @@ class MainActivity : ComponentActivity() {
     private fun startReview() {
         lifecycleScope.launch {
             reviewQueue = withContext(Dispatchers.IO) { Study.dueList(this@MainActivity) }
+            reviewTotal = reviewQueue.size
             reviewQueue.firstOrNull()?.let { reviewPreview = withContext(Dispatchers.IO) { Study.preview(this@MainActivity, it.char) } }
             revealed = false
             screen = Screen.Review

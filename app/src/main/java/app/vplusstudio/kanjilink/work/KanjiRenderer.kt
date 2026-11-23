@@ -1,5 +1,6 @@
 package app.vplusstudio.kanjilink.work
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -8,6 +9,8 @@ import android.graphics.Typeface
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import androidx.core.content.res.ResourcesCompat
+import app.vplusstudio.kanjilink.R
 import app.vplusstudio.kanjilink.data.Kanji
 import java.util.Locale
 
@@ -22,6 +25,13 @@ object KanjiRenderer {
     )
     val paletteNames = listOf("Night", "Paper", "Indigo")
 
+    @Volatile private var kanjiTypeface: Typeface? = null
+
+    /** Noto Serif JP Bold, bundled; falls back to the system font if it cannot load. */
+    fun kanjiTypeface(context: Context): Typeface =
+        kanjiTypeface ?: (runCatching { ResourcesCompat.getFont(context, R.font.noto_serif_jp_bold) }.getOrNull()
+            ?: Typeface.DEFAULT_BOLD).also { kanjiTypeface = it }
+
     private fun paint(color: Int, sizePx: Float, bold: Boolean = false) = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
         this.color = color
         textSize = sizePx
@@ -35,7 +45,7 @@ object KanjiRenderer {
      * Lock-screen layout: the clock sits in the top third on most phones, so the kanji is
      * drawn slightly below the centre, with readings and meaning under it.
      */
-    fun wallpaper(k: Kanji, width: Int, height: Int, theme: Int): Bitmap {
+    fun wallpaper(k: Kanji, width: Int, height: Int, theme: Int, kanjiFace: Typeface = Typeface.DEFAULT): Bitmap {
         val p = palettes[theme.coerceIn(palettes.indices)]
         val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val c = Canvas(bmp)
@@ -43,7 +53,7 @@ object KanjiRenderer {
         val cx = width / 2f
         val unit = width / 100f
 
-        val kanjiPaint = paint(p.ink, unit * 46f)
+        val kanjiPaint = paint(p.ink, unit * 46f).apply { typeface = kanjiFace }
         val kanjiBaseline = height * 0.60f
         c.drawText(k.char, cx, kanjiBaseline, kanjiPaint)
 
@@ -63,10 +73,10 @@ object KanjiRenderer {
     }
 
     /** Square glyph image for the widget (RemoteViews cannot set a text locale). */
-    fun glyph(k: Kanji, sizePx: Int, color: Int): Bitmap {
+    fun glyph(k: Kanji, sizePx: Int, color: Int, kanjiFace: Typeface = Typeface.DEFAULT): Bitmap {
         val bmp = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
         val c = Canvas(bmp)
-        val paint = paint(color, sizePx * 0.86f)
+        val paint = paint(color, sizePx * 0.86f).apply { typeface = kanjiFace }
         val fm = paint.fontMetrics
         val baseline = sizePx / 2f - (fm.ascent + fm.descent) / 2f
         c.drawText(k.char, sizePx / 2f, baseline, paint)

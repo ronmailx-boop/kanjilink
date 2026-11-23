@@ -17,12 +17,12 @@ data class Kanji(
 ) {
     val meaningLine: String get() = meanings.take(3).joinToString(", ")
 
-    /** "ニチ (nichi) · ひ (hi)": first two readings of each kind. */
+    /** "ニチ nichi · ひ hi": first two readings of each kind. */
     val readingLine: String
         get() {
             val parts = mutableListOf<String>()
-            on.take(2).forEachIndexed { i, r -> parts += "$r (${onRomaji[i]})" }
-            kun.take(2).forEachIndexed { i, r -> parts += "$r (${kunRomaji[i]})" }
+            on.take(2).forEachIndexed { i, r -> parts += "$r ${onRomaji[i]}" }
+            kun.take(2).forEachIndexed { i, r -> parts += "$r ${kunRomaji[i]}" }
             return parts.joinToString(" · ")
         }
 }

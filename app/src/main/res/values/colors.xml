@@ -1,5 +1,10 @@
 <resources>
     <color name="bg">#F7F3EA</color>
     <color name="brand">#C8402F</color>
-    <color name="widget_bg">#E6111216</color>
+    <!-- Widget: follows the phone's light/dark mode. -->
+    <color name="widget_bg">#FFFFFCF5</color>
+    <color name="widget_line">#FFE3DACB</color>
+    <color name="widget_ink">#FF1C1B19</color>
+    <color name="widget_muted">#FF6A635A</color>
+    <color name="widget_accent">#FFB8382A</color>
 </resources>
