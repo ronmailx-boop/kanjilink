@@ -24,15 +24,20 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Tests and debug APK
         run: ./gradlew --no-daemon testDebugUnitTest assembleDebug
+      # Artifacts are kept briefly to stay well inside GitHub's storage quota (500 MB on a free private repo).
+      # The debug APK is uploaded only for main and manual runs, not for every pull request.
       - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
         with:
           name: kanjilink-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: screenshots
           path: app/build/screenshots/
+          retention-days: 7
       - name: Check for upload key
         id: key
         env:
@@ -61,3 +66,4 @@ jobs:
         with:
           name: kanjilink-release-aab
           path: app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30

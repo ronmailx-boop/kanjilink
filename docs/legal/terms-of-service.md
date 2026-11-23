@@ -23,6 +23,6 @@ Pro הוא רכישה חד-פעמית בתוך האפליקציה, הנמכרת 
 אנו רשאים לעדכן תנאים אלה; תאריך התחולה יעודכן בהתאם. על תנאים אלה יחולו דיני מדינת ישראל, מבלי לגרוע מזכויות צרכניות קוגנטיות במדינת המשתמש.
 
 ## 7. יצירת קשר
-Vplus Studio · [CONTACT_EMAIL]
+Vplus Studio · vplusstudio.app@gmail.com
 
 גרסה באנגלית: https://kanjilink.vplusstudio.app/terms
