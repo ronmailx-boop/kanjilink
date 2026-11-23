@@ -1,12 +1,9 @@
 # Kanjilink: Project State
 
 ## Current Focus
-Preparing the first Google Play release (Ron approved the app, 23.11.2026). Ready in the repo: Pro via Play Billing
-(product `kanjilink_pro`, N5 free), signed release AAB (upload key sent to Ron, never committed), website + legal docs
-(`site/`, `docs/legal/`), store listing text and images (`store/en-US/`), and Ron's manual steps (`store/PLAY_CONSOLE_STEPS.md`).
-Contact email vplusstudio.app@gmail.com, Pro price $4.99. Waiting for Ron: GitHub secrets (4 upload-key values + CLOUDFLARE_API_TOKEN), create the app in
-Play Console, first manual AAB upload, App content forms, the in-app product, draft-app permission for the service account.
-Then: deploy the site, upload the listing via the API (show Ron first), Internal testing draft.
+Play: app created, internal test live (v2), store listing + images + contact details + Pro product (`kanjilink_pro`, $4.99,
+active) set via API. Waiting for Ron: the App content forms and License testing, then a test purchase from the internal
+test, then Production (Ron). Next code step if needed: Hebrew/other store translations.
 
 ## Decisions
 - Revert point for the v0.2 design polish: PR #5 (squash commit 08b0e0e). "Restore the previous design" = revert it.
@@ -36,8 +33,14 @@ Then: deploy the site, upload the listing via the API (show Ron first), Internal
 - [x] CI artifacts: debug APK 14 days (not on PRs), release AAB 30 days, screenshots only on failure (7 days)
 - [x] Store listing en-US (`store/en-US/listing.json`), icon 512, feature graphic, 6 screenshots (`tools/make_store_assets.py`)
 - [x] Signed release AAB builds locally (fixed lint: androidx.fragment 1.8.8)
-- [ ] Ron: email + price, secrets, Play Console steps (store/PLAY_CONSOLE_STEPS.md)
-- [ ] Deploy site, upload listing + images via API, Internal testing draft
+- [x] Secrets added; site live at https://kanjilink.vplusstudio.app (Cloudflare Worker "kanjilink", 23.11.2026)
+- [x] App created in Play Console (app.vplusstudio.kanjilink); versionCode 2 (0.1.0) rolled out to Internal testing by Ron
+- [x] Via API (approved 23.11.2026): en-US listing text, icon, feature graphic, 6 screenshots (verified identical);
+      contact email vplusstudio.app@gmail.com, website https://vplusstudio.app;
+      one-time product `kanjilink_pro` ACTIVE, $4.99 with Google's regional conversion (regions version 2026/01)
+- [ ] Ron: App content forms (privacy URL, app access, ads, content rating, target audience, data safety, etc.)
+- [ ] Ron: License testing (his Gmail) to test the Pro purchase for free; install from the internal test link
+- [ ] Ron: promote to Production when ready (API has no Production permission)
 
 ## Next
 - [x] First test on Ron's phone: works (2026-11-23)
