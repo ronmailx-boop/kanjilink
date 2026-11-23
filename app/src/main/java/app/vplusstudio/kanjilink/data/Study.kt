@@ -117,14 +117,39 @@ object Study {
         return pick
     }
 
-    /** Records an answer. known=false means "show it again soon". */
+    /** Days until the next review if the answer is "I know it". */
+    private fun nextInterval(old: Card): Double = if (old.intervalDays < 1.0) 1.0 else old.intervalDays * old.ease
+
+    /** True when the kanji has never been answered: show it fully instead of testing. */
     @Synchronized
-    fun answer(context: Context, char: String, known: Boolean) {
+    fun isNew(context: Context, char: String): Boolean = (cards(context)[char]?.reps ?: 0) == 0
+
+    /** Button captions: when the kanji comes back after "Again" / "I know it". */
+    @Synchronized
+    fun preview(context: Context, char: String): Pair<String, String> {
+        val old = cards(context)[char] ?: Card(0, 0.0, 2.5, 0, today())
+        return "10 min" to formatDays(nextInterval(old))
+    }
+
+    fun formatDays(days: Double): String {
+        val d = days.roundToLong().coerceAtLeast(1)
+        return when {
+            d == 1L -> "1 day"
+            d < 14 -> "$d days"
+            d < 60 -> "${(d + 3) / 7} weeks"
+            d < 365 -> "${(d + 15) / 30} months"
+            else -> "over a year"
+        }
+    }
+
+    /** Records an answer. known=false means "show it again soon". Returns when it comes back. */
+    @Synchronized
+    fun answer(context: Context, char: String, known: Boolean): String {
         val cards = cards(context)
         val now = System.currentTimeMillis()
         val old = cards[char] ?: Card(now, 0.0, 2.5, 0, today())
         val updated = if (known) {
-            val interval = if (old.intervalDays < 1.0) 1.0 else old.intervalDays * old.ease
+            val interval = nextInterval(old)
             old.copy(
                 due = now + (interval * DAY).roundToLong(),
                 intervalDays = interval,
@@ -137,6 +162,7 @@ object Study {
         cards[char] = updated
         save(context, cards)
         touchStreak(context)
+        return if (known) formatDays(updated.intervalDays) else "10 min"
     }
 
     /** Due kanji for an in-app review session, oldest first. */

@@ -72,6 +72,25 @@ class StudyTest {
     }
 
     @Test
+    fun previewMatchesAnswerAndGrows() {
+        val k = Study.advance(ctx)
+        assertTrue(Study.isNew(ctx, k.char))
+        assertEquals("10 min" to "1 day", Study.preview(ctx, k.char))
+        assertEquals("1 day", Study.answer(ctx, k.char, known = true))
+        assertTrue(!Study.isNew(ctx, k.char))
+        val next = Study.preview(ctx, k.char).second
+        assertEquals(next, Study.answer(ctx, k.char, known = true)) // 1 day * 2.55 -> "3 days"
+        assertEquals("3 days", next)
+        assertEquals("10 min", Study.answer(ctx, k.char, known = false))
+    }
+
+    @Test
+    fun radicalBookkeepingMeaningsRemoved() {
+        val one = KanjiRepository.byChar(ctx, "一")!!
+        assertEquals(listOf("one"), one.meanings)
+    }
+
+    @Test
     fun quietHoursWrapMidnight() {
         val p = Prefs(ctx).apply { quietStart = 22; quietEnd = 8 }
         assertTrue(p.isQuietHour(23))

@@ -3,7 +3,9 @@
 ## Current Focus
 v0.1 runs on Ron's phone (debug APK from Actions): "everything works". Fixed from his screenshots: chips cut
 off with a large system font (now wrap), and the English UI was mirrored on a Hebrew phone (now forced LTR).
-Next: Pro unlock (Play Billing) and Play Console preparation.
+Ron found "Again" vs "I know it" unclear (both just moved on). Now: each button shows when the kanji comes
+back ("back in 10 min" / "back in 3 days"), a toast confirms it, and a kanji seen before starts hidden
+("Show meaning") as a real self-test. Next: Pro unlock (Play Billing) and Play Console preparation.
 
 ## Decisions
 - Name **Kanjilink**, package `app.vplusstudio.kanjilink` (permanent once created in Play).
@@ -27,6 +29,8 @@ Next: Pro unlock (Play Billing) and Play Console preparation.
 ## Next
 - [x] First test on Ron's phone: works (2026-11-23)
 - [x] Fix: chip rows wrap (large font); UI forced LTR on RTL phones; one-line page titles
+- [x] Answer buttons show the next review time; toast after answering; self-test (hidden meaning) for seen kanji
+- [x] Fixes: "1 stroke", one-line stat labels, "xxx radical (no. N)" meanings removed from data
 - [ ] More device checks (Samsung/Xiaomi lock screen, widget)
 - [ ] Pro unlock via Play Billing (decide: one-time vs subscription; suggested free = N5)
 - [ ] Upload key + repo secrets (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD)

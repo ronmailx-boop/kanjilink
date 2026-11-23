@@ -75,11 +75,24 @@ class ScreenshotTest {
     }
 
     @Test
+    fun homeSelfTest() {
+        val k = KanjiRepository.all(ctx).first { it.char == "一" }
+        compose.setContent {
+            KanjilinkTheme {
+                Home(k, Study.Stats(5, 2, 79, 0, 2, 0), lockOn = false, revealed = false, isNew = false,
+                    preview = "10 min" to "1 day", {}, {}, {}, {}, {})
+            }
+        }
+        capture("home-self-test")
+    }
+
+    @Test
     fun home() {
         val k = KanjiRepository.all(ctx).first { it.char == "学" }
         compose.setContent {
             KanjilinkTheme {
-                Home(k, Study.Stats(5, 12, 79, 3, 2, 4), lockOn = true, {}, {}, {}, {})
+                Home(k, Study.Stats(5, 12, 79, 3, 2, 4), lockOn = true, revealed = true, isNew = false,
+                    preview = "10 min" to "3 days", {}, {}, {}, {}, {})
             }
         }
         capture("home")

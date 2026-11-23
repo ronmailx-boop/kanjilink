@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -88,11 +89,18 @@ fun KanjiCard(k: Kanji, reveal: Boolean = true) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                "JLPT N${k.level} · ${k.strokes} strokes",
+                "JLPT N${k.level} · ${k.strokes} ${if (k.strokes == 1) "stroke" else "strokes"}",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelLarge,
             )
             Text(k.char, style = JaStyle.copy(fontSize = 120.sp), modifier = Modifier.padding(vertical = 4.dp))
+            if (!reveal) {
+                Text(
+                    "What does it mean? How is it read?",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
             if (reveal) {
                 Text(
                     k.meanings.take(4).joinToString(", "),
@@ -125,11 +133,36 @@ private fun ReadingRow(label: String, kana: List<String>, romaji: List<String>) 
     }
 }
 
+/** Each button says when this kanji comes back, so the choice is clear. */
 @Composable
-fun AnswerButtons(onAgain: () -> Unit, onKnow: () -> Unit) {
+fun AnswerButtons(preview: Pair<String, String>, onAgain: () -> Unit, onKnow: () -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        OutlinedButton(onClick = onAgain, modifier = Modifier.weight(1f).height(52.dp)) { Text("Again") }
-        Button(onClick = onKnow, modifier = Modifier.weight(1f).height(52.dp)) { Text("I know it") }
+        OutlinedButton(onClick = onAgain, modifier = Modifier.weight(1f).heightIn(min = 60.dp)) {
+            ButtonLabel("Again", "back in ${preview.first}")
+        }
+        Button(onClick = onKnow, modifier = Modifier.weight(1f).heightIn(min = 60.dp)) {
+            ButtonLabel("I know it", "back in ${preview.second}")
+        }
+    }
+}
+
+@Composable
+private fun ButtonLabel(title: String, caption: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(title, fontWeight = FontWeight.SemiBold)
+        Text(caption, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+    }
+}
+
+/** For kanji seen before: try to remember first, then reveal and answer. */
+@Composable
+fun RevealOrAnswer(revealed: Boolean, preview: Pair<String, String>, onReveal: () -> Unit, onAnswer: (Boolean) -> Unit) {
+    if (revealed) {
+        AnswerButtons(preview, onAgain = { onAnswer(false) }, onKnow = { onAnswer(true) })
+    } else {
+        Button(onClick = onReveal, modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) {
+            ButtonLabel("Show meaning", "Do you remember it?")
+        }
     }
 }
 
@@ -142,7 +175,8 @@ fun Onboarding(onStart: (level: Int, perDay: Int) -> Unit) {
         Spacer(Modifier.height(8.dp))
         Text(
             "A new kanji appears on your lock screen, in a widget and in a gentle notification. " +
-                "Tap “I know it” or “Again” and Kanjilink spaces the reviews for you.",
+                "Tap “I know it” and it comes back in a day, then in a few days, then weeks. " +
+                "Tap “Again” and it comes back in 10 minutes.",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(24.dp))
@@ -183,6 +217,10 @@ fun Home(
     current: Kanji,
     stats: Study.Stats,
     lockOn: Boolean,
+    revealed: Boolean,
+    isNew: Boolean,
+    preview: Pair<String, String>,
+    onReveal: () -> Unit,
     onAnswer: (Boolean) -> Unit,
     onReview: () -> Unit,
     onSettings: () -> Unit,
@@ -191,13 +229,21 @@ fun Home(
     Page("Kanjilink", action = { TextButton(onClick = onSettings) { Text("Settings") } }) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Stat("Streak", "${stats.streak} d", Modifier.weight(1f))
-            Stat("Learned in N${stats.level}", "${stats.learned}/${stats.total}", Modifier.weight(1f))
+            Stat("N${stats.level} learned", "${stats.learned}/${stats.total}", Modifier.weight(1f))
             Stat("Due", "${stats.due}", Modifier.weight(1f))
         }
         Spacer(Modifier.height(16.dp))
-        KanjiCard(current)
+        if (isNew) {
+            Text(
+                "New kanji",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(bottom = 6.dp),
+            )
+        }
+        KanjiCard(current, reveal = revealed)
         Spacer(Modifier.height(16.dp))
-        AnswerButtons(onAgain = { onAnswer(false) }, onKnow = { onAnswer(true) })
+        RevealOrAnswer(revealed, preview, onReveal, onAnswer)
         Spacer(Modifier.height(12.dp))
         if (stats.due > 0) {
             OutlinedButton(onClick = onReview, modifier = Modifier.fillMaxWidth()) { Text("Review ${stats.due} due") }
@@ -229,14 +275,21 @@ fun Home(
 private fun Stat(label: String, value: String, modifier: Modifier) {
     Card(modifier, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(Modifier.padding(12.dp)) {
-            Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 1)
+            Text(
+                label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
 
 @Composable
-fun Review(k: Kanji?, revealed: Boolean, remaining: Int, onReveal: () -> Unit, onAnswer: (Boolean) -> Unit, onBack: () -> Unit) {
+fun Review(k: Kanji?, revealed: Boolean, remaining: Int, preview: Pair<String, String>, onReveal: () -> Unit, onAnswer: (Boolean) -> Unit, onBack: () -> Unit) {
     Page("Review", onBack = onBack) {
         if (k == null) {
             Text("All caught up. Nice work!", style = MaterialTheme.typography.headlineSmall)
@@ -248,11 +301,7 @@ fun Review(k: Kanji?, revealed: Boolean, remaining: Int, onReveal: () -> Unit, o
         Spacer(Modifier.height(8.dp))
         KanjiCard(k, reveal = revealed)
         Spacer(Modifier.height(16.dp))
-        if (revealed) {
-            AnswerButtons(onAgain = { onAnswer(false) }, onKnow = { onAnswer(true) })
-        } else {
-            Button(onClick = onReveal, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text("Show meaning") }
-        }
+        RevealOrAnswer(revealed, preview, onReveal, onAnswer)
     }
 }
 

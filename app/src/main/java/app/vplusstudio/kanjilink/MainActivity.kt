@@ -39,6 +39,10 @@ class MainActivity : ComponentActivity() {
     private var stats by mutableStateOf(Study.Stats(5, 0, 0, 0, 0, 0))
     private var reviewQueue by mutableStateOf<List<Kanji>>(emptyList())
     private var revealed by mutableStateOf(false)
+    private var homeRevealed by mutableStateOf(true)
+    private var currentIsNew by mutableStateOf(true)
+    private var homePreview by mutableStateOf("10 min" to "1 day")
+    private var reviewPreview by mutableStateOf("10 min" to "1 day")
     private var settings by mutableStateOf<SettingsState?>(null)
 
     private val notificationPermission =
@@ -70,6 +74,10 @@ class MainActivity : ComponentActivity() {
                             current = k,
                             stats = stats,
                             lockOn = settings?.lockOn == true,
+                            revealed = homeRevealed,
+                            isNew = currentIsNew,
+                            preview = homePreview,
+                            onReveal = { homeRevealed = true },
                             onAnswer = { known -> answer(k, known, advance = true) },
                             onReview = { startReview() },
                             onSettings = { screen = Screen.Settings },
@@ -80,6 +88,7 @@ class MainActivity : ComponentActivity() {
                         k = reviewQueue.firstOrNull(),
                         revealed = revealed,
                         remaining = reviewQueue.size,
+                        preview = reviewPreview,
                         onReveal = { revealed = true },
                         onAnswer = { known -> reviewQueue.firstOrNull()?.let { answer(it, known, advance = false) } },
                         onBack = { screen = Screen.Home; refresh() },
@@ -109,9 +118,16 @@ class MainActivity : ComponentActivity() {
 
     private fun refresh() {
         lifecycleScope.launch {
-            val (k, s) = withContext(Dispatchers.IO) { Study.current(this@MainActivity) to Study.stats(this@MainActivity) }
+            val ctx = this@MainActivity
+            val (k, s) = withContext(Dispatchers.IO) { Study.current(ctx) to Study.stats(ctx) }
+            val (isNew, preview) = withContext(Dispatchers.IO) { Study.isNew(ctx, k.char) to Study.preview(ctx, k.char) }
+            // A new kanji is shown in full; one seen before starts hidden as a small self-test.
+            if (k.char != current?.char) homeRevealed = isNew
             current = k
+            currentIsNew = isNew
+            homePreview = preview
             stats = s
+            reviewQueue.firstOrNull()?.let { r -> reviewPreview = withContext(Dispatchers.IO) { Study.preview(ctx, r.char) } }
         }
     }
 
@@ -133,14 +149,16 @@ class MainActivity : ComponentActivity() {
 
     private fun answer(k: Kanji, known: Boolean, advance: Boolean) {
         lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                Study.answer(this@MainActivity, k.char, known)
+            val back = withContext(Dispatchers.IO) {
+                val back = Study.answer(this@MainActivity, k.char, known)
                 if (advance) {
                     val next = Study.advance(this@MainActivity)
                     Outputs.cancelNotification(this@MainActivity)
                     Outputs.refreshAll(this@MainActivity, next, notify = false)
                 }
+                back
             }
+            Toast.makeText(this@MainActivity, "${k.char} · back in $back", Toast.LENGTH_SHORT).show()
             if (!advance) {
                 reviewQueue = reviewQueue.drop(1)
                 revealed = false
@@ -152,6 +170,7 @@ class MainActivity : ComponentActivity() {
     private fun startReview() {
         lifecycleScope.launch {
             reviewQueue = withContext(Dispatchers.IO) { Study.dueList(this@MainActivity) }
+            reviewQueue.firstOrNull()?.let { reviewPreview = withContext(Dispatchers.IO) { Study.preview(this@MainActivity, it.char) } }
             revealed = false
             screen = Screen.Review
         }

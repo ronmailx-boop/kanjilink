@@ -10,6 +10,7 @@ Usage: python3 tools/build_kanji_data.py <kanjidic2.xml> <kanji-data.json> <out.
 Re-run with the newest KANJIDIC2 before each release (EDRDG licence, section 4).
 """
 import json
+import re
 import sys
 import xml.etree.ElementTree as ET
 
@@ -33,6 +34,9 @@ KANA = {
     "ぽ": "po", "ぁ": "a", "ぃ": "i", "ぅ": "u", "ぇ": "e", "ぉ": "o", "ゃ": "ya", "ゅ": "yu",
     "ょ": "yo", "ー": "-",
 }
+
+
+RADICAL_NO = re.compile(r"radical \(no\.\s*\d+\)")
 
 
 def kata_to_hira(s):
@@ -93,6 +97,9 @@ def main(kd2_path, levels_path, out_path):
                 for m in grp.findall("meaning"):
                     if m.get("m_lang") is None:
                         meanings.append(m.text)
+        # "one radical (no.1)" is dictionary bookkeeping, not a meaning learners need.
+        plain = [m for m in meanings if not RADICAL_NO.search(m)]
+        meanings = plain or meanings
         if not meanings:
             continue
         out.append({
