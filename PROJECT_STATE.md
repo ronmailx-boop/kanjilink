@@ -1,9 +1,22 @@
 # Kanjilink: Project State
 
 ## Current Focus
-Play: app created, internal test live (v2), store listing + images + contact details + Pro product (`kanjilink_pro`, $4.99,
-active) set via API. Internal test v3 live, Pro purchase tested OK, App content forms done by Ron. Next: Ron
-promotes to Production in Play Console (Google review, usually a few days). Next code step if needed: Hebrew/other store translations.
+**Stopped at (23.11.2026):** v3 (0.1.0, versionCode 3) sent by Ron from Play Console to **Production review**
+(177 countries + rest of world, managed publishing off = goes live automatically when approved). Everything else in
+Play is done: listing, images, contact details, `kanjilink_pro` active ($4.99), App content forms, internal test v3,
+test purchase OK.
+
+**Next steps:**
+1. Wait for Google's review e-mail. If rejected: read the reason and fix (app access uses the review code; the code is
+   only in Play Console's App access form and in Ron's file `kanjilink-review-code.txt`).
+2. Small follow-up release: upload native debug symbols (Play warning) – add
+   `ndk { debugSymbolLevel = "FULL" }` under `defaultConfig` / release in `app/build.gradle.kts`.
+3. After launch: marketing with Buzz Builder (store listing translations ES/PT/FR/DE, promo video, posts).
+4. Later features: stroke order (KanjiVG), example words (JMdict), translated meanings.
+
+**How releases work:** push to `main` → GitHub Actions "Android build" builds a signed AAB (`kanjilink-release-aab`
+artifact, versionCode = run number). Upload to Internal testing with the `vplus-publishing` skill
+(`play_upload.py`, draft) after Ron approves; Ron promotes to Production in Play Console.
 
 ## Decisions
 - Revert point for the v0.2 design polish: PR #5 (squash commit 08b0e0e). "Restore the previous design" = revert it.
