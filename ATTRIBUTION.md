@@ -8,7 +8,8 @@ Kanjilink's app code is proprietary (Vplus Studio). The kanji data bundled in
 |---|---|---|
 | [KANJIDIC2](https://www.edrdg.org/wiki/index.php/KANJIDIC_Project), Electronic Dictionary Research and Development Group (EDRDG) | Kanji, meanings, on/kun readings, stroke counts, frequency | [CC BY-SA 4.0 / EDRDG licence](https://www.edrdg.org/edrdg/licence.html) |
 | JLPT N5–N1 lists by [Jonathan Waller](http://www.tanos.co.uk/jlpt/) | Level of each kanji | Credited; via kanji-data |
-| [Noto Serif JP](https://github.com/notofonts/noto-cjk) Bold, subset to the app's 2,211 kanji (`app/src/main/res/font/`) | Kanji in the app, widget, lock screen, and the 字 in the launcher/notification icons | SIL OFL 1.1 (text in `app/src/main/assets/licenses/OFL-NotoSerifJP.txt`) |
+| [Noto Sans JP](https://github.com/notofonts/noto-cjk) Bold, subset to the app's 2,211 kanji (`app/src/main/res/font/`) | Kanji in the app, widget and lock screen (default "Sans" style) | SIL OFL 1.1 (same text as below) |
+| [Noto Serif JP](https://github.com/notofonts/noto-cjk) Bold, subset the same way | "Serif" style, and the 字 in the launcher/notification icons | SIL OFL 1.1 (text in `app/src/main/assets/licenses/OFL-Noto-CJK.txt`) |
 | Material Icons "settings", "arrow_back" | Settings and back buttons | Apache 2.0 |
 | [kanji-data](https://github.com/davidluzgouveia/kanji-data) by David Gouveia | The `jlpt_new` field only (no WaniKani content is used) | MIT |
 

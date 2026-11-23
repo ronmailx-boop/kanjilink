@@ -25,12 +25,16 @@ object KanjiRenderer {
     )
     val paletteNames = listOf("Night", "Paper", "Indigo")
 
-    @Volatile private var kanjiTypeface: Typeface? = null
+    private val faces = arrayOfNulls<Typeface>(2)
 
-    /** Noto Serif JP Bold, bundled; falls back to the system font if it cannot load. */
-    fun kanjiTypeface(context: Context): Typeface =
-        kanjiTypeface ?: (runCatching { ResourcesCompat.getFont(context, R.font.noto_serif_jp_bold) }.getOrNull()
-            ?: Typeface.DEFAULT_BOLD).also { kanjiTypeface = it }
+    /** Bundled kanji font for the chosen style (Noto Sans JP / Noto Serif JP); system font if it cannot load. */
+    fun kanjiTypeface(context: Context, style: Int = app.vplusstudio.kanjilink.data.Prefs(context).kanjiStyle): Typeface {
+        val i = style.coerceIn(0, 1)
+        faces[i]?.let { return it }
+        val res = if (i == 1) R.font.noto_serif_jp_bold else R.font.noto_sans_jp_bold
+        return (runCatching { ResourcesCompat.getFont(context, res) }.getOrNull() ?: Typeface.DEFAULT_BOLD)
+            .also { faces[i] = it }
+    }
 
     private fun paint(color: Int, sizePx: Float, bold: Boolean = false) = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
         this.color = color

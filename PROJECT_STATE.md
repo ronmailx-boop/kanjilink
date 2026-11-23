@@ -8,6 +8,7 @@ back ("back in 10 min" / "back in 3 days"), a toast confirms it, and a kanji see
 ("Show meaning") as a real self-test. Next: Pro unlock (Play Billing) and Play Console preparation.
 
 ## Decisions
+- Revert point for the v0.2 design polish: PR #5 (squash commit 08b0e0e). "Restore the previous design" = revert it.
 - Name **Kanjilink**, package `app.vplusstudio.kanjilink` (permanent once created in Play).
 - Native Kotlin + Jetpack Compose (lock-screen wallpaper, widget and scheduled notifications need native).
 - No server, no account; progress in `filesDir/cards.json` + SharedPreferences.
@@ -36,6 +37,8 @@ back ("back in 10 min" / "back in 3 days"), a toast confirms it, and a kanji see
 - [x] Design polish (v0.2, same look): 字 icon from the real Noto Serif JP glyph; bundled Noto Serif JP for all
       kanji; app mark in headers; stats panel with level progress bar; card/panel styling; settings icon;
       settings in grouped panels; review progress bar; widget redesign (light/dark, small 2x2 + wide layout)
+- [x] Kanji style setting: Sans (Noto Sans JP, default, closest to handwriting) / Serif (Noto Serif JP, book style);
+      applies to app, widget and lock screen. The app mark and launcher icon stay serif.
 - [ ] More device checks (Samsung/Xiaomi lock screen, widget)
 - [ ] Pro unlock via Play Billing (decide: one-time vs subscription; suggested free = N5)
 - [ ] Upload key + repo secrets (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD)

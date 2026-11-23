@@ -136,6 +136,35 @@ class ScreenshotTest {
     }
 
     @Test
+    fun settingsKanjiStyle() {
+        compose.setContent {
+            KanjilinkTheme {
+                app.vplusstudio.kanjilink.ui.Settings(
+                    app.vplusstudio.kanjilink.ui.SettingsState(true, 3, 22, 8, true, 0, 5, 5, kanjiStyle = 0), {}, {}, {},
+                )
+            }
+        }
+        capture("settings")
+    }
+
+    @Test
+    fun homeSerif() {
+        app.vplusstudio.kanjilink.ui.KanjiFontState.style = 1
+        try {
+            val k = KanjiRepository.all(ctx).first { it.char == "国" }
+            compose.setContent {
+                KanjilinkTheme {
+                    Home(k, Study.Stats(5, 12, 79, 3, 2, 4), lockOn = true, revealed = true, isNew = false,
+                        preview = "10 min" to "3 days", {}, {}, {}, {}, {})
+                }
+            }
+            capture("home-serif")
+        } finally {
+            app.vplusstudio.kanjilink.ui.KanjiFontState.style = 0
+        }
+    }
+
+    @Test
     fun home() {
         val k = KanjiRepository.all(ctx).first { it.char == "学" }
         compose.setContent {
