@@ -2,8 +2,8 @@
 
 ## Current Focus
 Play: app created, internal test live (v2), store listing + images + contact details + Pro product (`kanjilink_pro`, $4.99,
-active) set via API. Waiting for Ron: the App content forms and License testing, then a test purchase from the internal
-test, then Production (Ron). Next code step if needed: Hebrew/other store translations.
+active) set via API. Internal test v3 live, Pro purchase tested OK, App content forms done by Ron. Next: Ron
+promotes to Production in Play Console (Google review, usually a few days). Next code step if needed: Hebrew/other store translations.
 
 ## Decisions
 - Revert point for the v0.2 design polish: PR #5 (squash commit 08b0e0e). "Restore the previous design" = revert it.
@@ -38,8 +38,9 @@ test, then Production (Ron). Next code step if needed: Hebrew/other store transl
 - [x] Via API (approved 23.11.2026): en-US listing text, icon, feature graphic, 6 screenshots (verified identical);
       contact email vplusstudio.app@gmail.com, website https://vplusstudio.app;
       one-time product `kanjilink_pro` ACTIVE, $4.99 with Google's regional conversion (regions version 2026/01)
-- [ ] Ron: App content forms (privacy URL, app access, ads, content rating, target audience, data safety, etc.)
-- [ ] Ron: License testing (his Gmail) to test the Pro purchase for free; install from the internal test link
+- [x] versionCode 3 (review code) rolled out to Internal testing; test purchase of Pro worked on Ron's phone (23.11.2026)
+- [x] Ron filled the App content forms (app access with review code, content rating, target audience 13+, ads,
+      data safety, privacy, business status + terms URL) – the API cannot read them; check the Dashboard
 - [ ] Ron: promote to Production when ready (API has no Production permission)
 
 ## Next
