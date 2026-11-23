@@ -123,6 +123,17 @@ class StudyTest {
     }
 
     @Test
+    fun reviewUnlockGivesProWithoutPurchase() {
+        val p = Prefs(ctx)
+        p.playPro = false
+        p.reviewUnlock = true
+        assertTrue(p.isPro)
+        assertEquals(2211, Study.studyPath(ctx).size)
+        p.reviewUnlock = false
+        assertTrue(!p.isPro)
+    }
+
+    @Test
     fun kanjiStyleDefaultsToSans() {
         assertEquals(0, Prefs(ctx).kanjiStyle)
     }

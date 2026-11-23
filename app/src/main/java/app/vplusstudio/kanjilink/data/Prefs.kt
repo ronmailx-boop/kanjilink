@@ -50,10 +50,20 @@ class Prefs(context: Context) {
         get() = p.getInt("kanjiStyle", 0)
         set(v) = p.edit().putInt("kanjiStyle", v).apply()
 
-    /** Pro unlocked (one-time purchase). Cached; Google Play is the source of truth at every start. */
-    var isPro: Boolean
+    /** Pro bought on Google Play (cached; Google Play is the source of truth at every start). */
+    var playPro: Boolean
         get() = p.getBoolean("isPro", false)
         set(v) = p.edit().putBoolean("isPro", v).apply()
+
+    /** Pro unlocked with the store-review code (for Google Play reviewers). */
+    var reviewUnlock: Boolean
+        get() = p.getBoolean("reviewUnlock", false)
+        set(v) = p.edit().putBoolean("reviewUnlock", v).apply()
+
+    /** Pro features available: bought, or unlocked with the review code. */
+    var isPro: Boolean
+        get() = playPro || reviewUnlock
+        set(v) { playPro = v }
 
     var currentKanji: String?
         get() = p.getString("currentKanji", null)

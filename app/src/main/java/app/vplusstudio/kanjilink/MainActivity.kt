@@ -92,6 +92,7 @@ class MainActivity : ComponentActivity() {
                         onBuy = { if (!billing.buy(this)) toast("Google Play is not ready. Please try again in a moment.") },
                         onRestore = { billing.refreshPurchases(); toast("Checking your purchases…") },
                         onBack = { screen = paywallReturn; refresh() },
+                        onReviewCode = { code -> billing.redeemReviewCode(code) },
                     )
                     Screen.Home -> current?.let { k ->
                         Home(
@@ -171,6 +172,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (::billing.isInitialized && billing.state.available) billing.refreshPurchases()
         refresh()
     }
 
