@@ -86,6 +86,20 @@ class ScreenshotTest {
         capture("home-self-test")
     }
 
+    /** Large font on a narrow screen: captions and readings must wrap, not be cut. */
+    @Test
+    @Config(qualifiers = "w260dp-h891dp-night-xxhdpi")
+    fun homeNarrow() {
+        val k = KanjiRepository.all(ctx).first { it.char == "一" }
+        compose.setContent {
+            KanjilinkTheme {
+                Home(k, Study.Stats(5, 2, 79, 0, 2, 1), lockOn = false, revealed = true, isNew = true,
+                    preview = "10 min" to "1 day", {}, {}, {}, {}, {})
+            }
+        }
+        capture("home-narrow")
+    }
+
     @Test
     fun home() {
         val k = KanjiRepository.all(ctx).first { it.char == "学" }

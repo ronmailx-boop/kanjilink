@@ -31,6 +31,8 @@ back ("back in 10 min" / "back in 3 days"), a toast confirms it, and a kanji see
 - [x] Fix: chip rows wrap (large font); UI forced LTR on RTL phones; one-line page titles
 - [x] Answer buttons show the next review time; toast after answering; self-test (hidden meaning) for seen kanji
 - [x] Fixes: "1 stroke", one-line stat labels, "xxx radical (no. N)" meanings removed from data
+- [x] Large-font fixes: captions "in 10 min" / "in 1 day" wrap instead of being cut, stat label "N5",
+      each reading (kana + romaji) kept together, aligned On/Kun column
 - [ ] More device checks (Samsung/Xiaomi lock screen, widget)
 - [ ] Pro unlock via Play Billing (decide: one-time vs subscription; suggested free = N5)
 - [ ] Upload key + repo secrets (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD)

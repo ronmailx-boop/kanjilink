@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -116,6 +117,7 @@ fun KanjiCard(k: Kanji, reveal: Boolean = true) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ReadingRow(label: String, kana: List<String>, romaji: List<String>) {
     if (kana.isEmpty()) return
@@ -124,12 +126,14 @@ private fun ReadingRow(label: String, kana: List<String>, romaji: List<String>) 
             label,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.padding(end = 12.dp, top = 2.dp),
+            modifier = Modifier.width(44.dp).padding(top = 2.dp),
         )
-        Text(
-            kana.take(4).mapIndexed { i, r -> "$r ${romaji[i]}" }.joinToString("   "),
-            style = JaStyle.merge(MaterialTheme.typography.bodyLarge),
-        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            kana.take(4).forEachIndexed { i, r ->
+                // Non-breaking space keeps the kana and its romaji on one line.
+                Text("$r\u00A0${romaji[i]}", style = JaStyle.merge(MaterialTheme.typography.bodyLarge), softWrap = false)
+            }
+        }
     }
 }
 
@@ -138,10 +142,10 @@ private fun ReadingRow(label: String, kana: List<String>, romaji: List<String>) 
 fun AnswerButtons(preview: Pair<String, String>, onAgain: () -> Unit, onKnow: () -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         OutlinedButton(onClick = onAgain, modifier = Modifier.weight(1f).heightIn(min = 60.dp)) {
-            ButtonLabel("Again", "back in ${preview.first}")
+            ButtonLabel("Again", "in ${preview.first}")
         }
         Button(onClick = onKnow, modifier = Modifier.weight(1f).heightIn(min = 60.dp)) {
-            ButtonLabel("I know it", "back in ${preview.second}")
+            ButtonLabel("I know it", "in ${preview.second}")
         }
     }
 }
@@ -149,8 +153,8 @@ fun AnswerButtons(preview: Pair<String, String>, onAgain: () -> Unit, onKnow: ()
 @Composable
 private fun ButtonLabel(title: String, caption: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(title, fontWeight = FontWeight.SemiBold)
-        Text(caption, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+        Text(title, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+        Text(caption, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
     }
 }
 
@@ -229,7 +233,7 @@ fun Home(
     Page("Kanjilink", action = { TextButton(onClick = onSettings) { Text("Settings") } }) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Stat("Streak", "${stats.streak} d", Modifier.weight(1f))
-            Stat("N${stats.level} learned", "${stats.learned}/${stats.total}", Modifier.weight(1f))
+            Stat("N${stats.level}", "${stats.learned}/${stats.total}", Modifier.weight(1f))
             Stat("Due", "${stats.due}", Modifier.weight(1f))
         }
         Spacer(Modifier.height(16.dp))
