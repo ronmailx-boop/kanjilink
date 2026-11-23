@@ -10,6 +10,9 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.Color
 
+/** Kanji colour on the red app mark, same as the launcher icon. */
+val Paper = Color(0xFFF7F3EA)
+
 private val Vermilion = Color(0xFFC8402F)
 private val VermilionLight = Color(0xFFE86A56)
 
@@ -24,6 +27,7 @@ private val Light = lightColorScheme(
     onBackground = Color(0xFF1C1B19),
     onSurface = Color(0xFF1C1B19),
     onSurfaceVariant = Color(0xFF5E5850),
+    outlineVariant = Color(0xFFE3DACB),
 )
 
 private val Dark = darkColorScheme(
@@ -37,6 +41,7 @@ private val Dark = darkColorScheme(
     onBackground = Color(0xFFF4F1EA),
     onSurface = Color(0xFFF4F1EA),
     onSurfaceVariant = Color(0xFFA9A59D),
+    outlineVariant = Color(0xFF2E2F36),
 )
 
 @Composable

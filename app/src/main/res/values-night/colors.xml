@@ -1,3 +1,8 @@
 <resources>
     <color name="bg">#111216</color>
+    <color name="widget_bg">#FF1B1C21</color>
+    <color name="widget_line">#FF2E2F36</color>
+    <color name="widget_ink">#FFF4F1EA</color>
+    <color name="widget_muted">#FFA9A59D</color>
+    <color name="widget_accent">#FFE86A56</color>
 </resources>

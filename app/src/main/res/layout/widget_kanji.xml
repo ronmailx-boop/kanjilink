@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Small (2x2) widget: level, kanji, meaning, reading. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
@@ -6,13 +7,25 @@
     android:background="@drawable/widget_bg"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="10dp">
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/widget_level"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:letterSpacing="0.12"
+        android:text="N5"
+        android:textColor="@color/widget_accent"
+        android:textSize="11sp"
+        android:textStyle="bold" />
 
     <ImageView
         android:id="@+id/widget_glyph"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:src="@drawable/ic_notification" />
+        android:layout_marginTop="2dp"
+        android:src="@drawable/ic_notification"
+        android:tint="@color/widget_ink" />
 
     <TextView
         android:id="@+id/widget_meaning"
@@ -21,10 +34,10 @@
         android:layout_marginTop="4dp"
         android:ellipsize="end"
         android:gravity="center"
-        android:maxLines="2"
+        android:maxLines="1"
         android:text="@string/app_name"
-        android:textColor="#FFF4F1EA"
-        android:textSize="14sp"
+        android:textColor="@color/widget_ink"
+        android:textSize="15sp"
         android:textStyle="bold" />
 
     <TextView
@@ -34,6 +47,6 @@
         android:ellipsize="end"
         android:gravity="center"
         android:maxLines="1"
-        android:textColor="#FFA9A59D"
-        android:textSize="11sp" />
+        android:textColor="@color/widget_muted"
+        android:textSize="12sp" />
 </LinearLayout>

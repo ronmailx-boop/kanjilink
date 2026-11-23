@@ -33,6 +33,9 @@ back ("back in 10 min" / "back in 3 days"), a toast confirms it, and a kanji see
 - [x] Fixes: "1 stroke", one-line stat labels, "xxx radical (no. N)" meanings removed from data
 - [x] Large-font fixes: captions "in 10 min" / "in 1 day" wrap instead of being cut, stat label "N5",
       each reading (kana + romaji) kept together, aligned On/Kun column
+- [x] Design polish (v0.2, same look): 字 icon from the real Noto Serif JP glyph; bundled Noto Serif JP for all
+      kanji; app mark in headers; stats panel with level progress bar; card/panel styling; settings icon;
+      settings in grouped panels; review progress bar; widget redesign (light/dark, small 2x2 + wide layout)
 - [ ] More device checks (Samsung/Xiaomi lock screen, widget)
 - [ ] Pro unlock via Play Billing (decide: one-time vs subscription; suggested free = N5)
 - [ ] Upload key + repo secrets (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD)

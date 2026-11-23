@@ -1,26 +1,37 @@
 package app.vplusstudio.kanjilink.ui
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -28,29 +39,57 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.LocaleList
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.vplusstudio.kanjilink.R
 import app.vplusstudio.kanjilink.data.Kanji
 import app.vplusstudio.kanjilink.data.Study
 import app.vplusstudio.kanjilink.work.KanjiRenderer
 
-/** Japanese glyph shapes for kanji, whatever the phone's language. */
+/** Noto Serif JP Bold, bundled for the app's kanji (SIL OFL 1.1). */
+val KanjiFont = FontFamily(Font(R.font.noto_serif_jp_bold, FontWeight.Bold))
+
+/** Japanese glyph shapes for kana, whatever the phone's language. */
 private val JaStyle = TextStyle(localeList = LocaleList("ja"))
+private val KanjiStyle = TextStyle(fontFamily = KanjiFont, fontWeight = FontWeight.Bold, localeList = LocaleList("ja"))
+
+private val CardShape = RoundedCornerShape(24.dp)
+
+/** The app's mark: the launcher icon (red square, 字) at any size. */
+@Composable
+fun AppMark(size: Dp) {
+    Box(
+        Modifier
+            .size(size)
+            .clip(RoundedCornerShape(size * 0.28f))
+            .background(MaterialTheme.colorScheme.primary),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text("字", style = KanjiStyle.copy(fontSize = (size.value * 0.56f).sp, lineHeight = (size.value * 0.6f).sp), color = Paper)
+    }
+}
 
 @Composable
 fun Page(
     title: String,
     onBack: (() -> Unit)? = null,
     action: (@Composable () -> Unit)? = null,
-    content: @Composable () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
@@ -59,56 +98,85 @@ fun Page(
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 12.dp),
+                .padding(horizontal = 20.dp, vertical = 8.dp),
         ) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                if (onBack != null) TextButton(onClick = onBack) { Text("← Back") }
+            Row(Modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (onBack != null) {
+                    IconButton(onClick = onBack) { Icon(painterResource(R.drawable.ic_back), contentDescription = "Back") }
+                    Spacer(Modifier.width(4.dp))
+                } else {
+                    AppMark(32.dp)
+                    Spacer(Modifier.width(12.dp))
+                }
                 Text(
                     title,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.weight(1f).padding(start = if (onBack == null) 4.dp else 0.dp),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
                 )
                 action?.invoke()
             }
             Spacer(Modifier.height(12.dp))
             content()
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-fun KanjiCard(k: Kanji, reveal: Boolean = true) {
+private fun Panel(modifier: Modifier = Modifier, tinted: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
     Card(
-        Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-    ) {
-        Column(
-            Modifier.fillMaxWidth().padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+        modifier.fillMaxWidth(),
+        shape = CardShape,
+        colors = CardDefaults.cardColors(
+            containerColor = if (tinted) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
+        ),
+        border = if (tinted) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) { Column(Modifier.padding(20.dp), content = content) }
+}
+
+@Composable
+private fun LevelPill(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+    )
+}
+
+@Composable
+fun KanjiCard(k: Kanji, reveal: Boolean = true) {
+    Panel {
+        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            LevelPill("JLPT N${k.level} · ${k.strokes} ${if (k.strokes == 1) "stroke" else "strokes"}")
             Text(
-                "JLPT N${k.level} · ${k.strokes} ${if (k.strokes == 1) "stroke" else "strokes"}",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelLarge,
+                k.char,
+                style = KanjiStyle.copy(fontSize = 132.sp, lineHeight = 150.sp),
+                modifier = Modifier.padding(vertical = 8.dp),
             )
-            Text(k.char, style = JaStyle.copy(fontSize = 120.sp), modifier = Modifier.padding(vertical = 4.dp))
             if (!reveal) {
                 Text(
                     "What does it mean? How is it read?",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 8.dp),
                 )
-            }
-            if (reveal) {
+            } else {
                 Text(
                     k.meanings.take(4).joinToString(", "),
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                 )
+                Spacer(Modifier.height(16.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Spacer(Modifier.height(12.dp))
                 ReadingRow("On", k.on, k.onRomaji)
                 ReadingRow("Kun", k.kun, k.kunRomaji)
@@ -121,17 +189,22 @@ fun KanjiCard(k: Kanji, reveal: Boolean = true) {
 @Composable
 private fun ReadingRow(label: String, kana: List<String>, romaji: List<String>) {
     if (kana.isEmpty()) return
-    Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Text(
-            label,
+            label.uppercase(),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.width(44.dp).padding(top = 2.dp),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.width(48.dp).padding(top = 4.dp),
         )
         FlowRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             kana.take(4).forEachIndexed { i, r ->
                 // Non-breaking space keeps the kana and its romaji on one line.
-                Text("$r\u00A0${romaji[i]}", style = JaStyle.merge(MaterialTheme.typography.bodyLarge), softWrap = false)
+                Text(
+                    "$r ${romaji[i]}",
+                    style = JaStyle.merge(MaterialTheme.typography.bodyLarge),
+                    softWrap = false,
+                )
             }
         }
     }
@@ -141,10 +214,10 @@ private fun ReadingRow(label: String, kana: List<String>, romaji: List<String>) 
 @Composable
 fun AnswerButtons(preview: Pair<String, String>, onAgain: () -> Unit, onKnow: () -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        OutlinedButton(onClick = onAgain, modifier = Modifier.weight(1f).heightIn(min = 60.dp)) {
+        OutlinedButton(onClick = onAgain, modifier = Modifier.weight(1f).heightIn(min = 64.dp)) {
             ButtonLabel("Again", "in ${preview.first}")
         }
-        Button(onClick = onKnow, modifier = Modifier.weight(1f).heightIn(min = 60.dp)) {
+        Button(onClick = onKnow, modifier = Modifier.weight(1f).heightIn(min = 64.dp)) {
             ButtonLabel("I know it", "in ${preview.second}")
         }
     }
@@ -153,7 +226,7 @@ fun AnswerButtons(preview: Pair<String, String>, onAgain: () -> Unit, onKnow: ()
 @Composable
 private fun ButtonLabel(title: String, caption: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(title, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+        Text(title, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         Text(caption, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
     }
 }
@@ -164,7 +237,7 @@ fun RevealOrAnswer(revealed: Boolean, preview: Pair<String, String>, onReveal: (
     if (revealed) {
         AnswerButtons(preview, onAgain = { onAnswer(false) }, onKnow = { onAnswer(true) })
     } else {
-        Button(onClick = onReveal, modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) {
+        Button(onClick = onReveal, modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp)) {
             ButtonLabel("Show meaning", "Do you remember it?")
         }
     }
@@ -172,10 +245,17 @@ fun RevealOrAnswer(revealed: Boolean, preview: Pair<String, String>, onReveal: (
 
 @Composable
 fun Onboarding(onStart: (level: Int, perDay: Int) -> Unit) {
-    var level = androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(5) }
-    var perDay = androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(5) }
+    val level = remember { mutableIntStateOf(5) }
+    val perDay = remember { mutableIntStateOf(5) }
     Page("Kanjilink") {
-        Text("Learn kanji every time you look at your phone.", style = MaterialTheme.typography.headlineSmall)
+        Spacer(Modifier.height(8.dp))
+        AppMark(72.dp)
+        Spacer(Modifier.height(20.dp))
+        Text(
+            "Learn kanji every time you look at your phone.",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
         Spacer(Modifier.height(8.dp))
         Text(
             "A new kanji appears on your lock screen, in a widget and in a gentle notification. " +
@@ -184,25 +264,31 @@ fun Onboarding(onStart: (level: Int, perDay: Int) -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(24.dp))
-        Text("Start at", style = MaterialTheme.typography.titleMedium)
-        ChipRow(listOf(5, 4, 3, 2, 1), level.intValue, { "N$it" }) { level.intValue = it }
-        Text(
-            "N5 is the easiest. Not sure? Start at N5.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(20.dp))
-        Text("New kanji per day", style = MaterialTheme.typography.titleMedium)
-        ChipRow(listOf(3, 5, 10, 15), perDay.intValue, { "$it" }) { perDay.intValue = it }
-        Spacer(Modifier.height(32.dp))
-        Button(onClick = { onStart(level.intValue, perDay.intValue) }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-            Text("Start learning")
+        Panel {
+            Text("Start at", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+            ChipRow(listOf(5, 4, 3, 2, 1), level.intValue, { "N$it" }) { level.intValue = it }
+            Text(
+                "N5 is the easiest. Not sure? Start at N5.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(20.dp))
+            Text("New kanji per day", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+            ChipRow(listOf(3, 5, 10, 15), perDay.intValue, { "$it" }) { perDay.intValue = it }
+        }
+        Spacer(Modifier.height(24.dp))
+        Button(onClick = { onStart(level.intValue, perDay.intValue) }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+            Text("Start learning", fontWeight = FontWeight.Bold)
         }
         Spacer(Modifier.height(8.dp))
         Text(
             "No account. Your progress stays on this phone.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -212,7 +298,17 @@ fun Onboarding(onStart: (level: Int, perDay: Int) -> Unit) {
 @Composable
 fun ChipRow(values: List<Int>, selected: Int, label: (Int) -> String, onSelect: (Int) -> Unit) {
     FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        values.forEach { v -> FilterChip(selected = v == selected, onClick = { onSelect(v) }, label = { Text(label(v)) }) }
+        values.forEach { v ->
+            FilterChip(
+                selected = v == selected,
+                onClick = { onSelect(v) },
+                label = { Text(label(v), fontWeight = if (v == selected) FontWeight.Bold else FontWeight.Normal) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                ),
+            )
+        }
     }
 }
 
@@ -230,79 +326,121 @@ fun Home(
     onSettings: () -> Unit,
     onLockToggle: (Boolean) -> Unit,
 ) {
-    Page("Kanjilink", action = { TextButton(onClick = onSettings) { Text("Settings") } }) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Stat("Streak", "${stats.streak} d", Modifier.weight(1f))
-            Stat("N${stats.level}", "${stats.learned}/${stats.total}", Modifier.weight(1f))
-            Stat("Due", "${stats.due}", Modifier.weight(1f))
+    Page(
+        "Kanjilink",
+        action = {
+            IconButton(onClick = onSettings) { Icon(painterResource(R.drawable.ic_settings), contentDescription = "Settings") }
+        },
+    ) {
+        Panel(tinted = true) {
+            Row(Modifier.fillMaxWidth()) {
+                Stat("${stats.streak}", if (stats.streak == 1) "day streak" else "day streak", Modifier.weight(1f))
+                Stat("${stats.learned}/${stats.total}", "N${stats.level}", Modifier.weight(1f))
+                Stat("${stats.due}", "due", Modifier.weight(1f))
+            }
+            Spacer(Modifier.height(14.dp))
+            LinearProgressIndicator(
+                progress = { if (stats.total == 0) 0f else stats.learned.toFloat() / stats.total },
+                modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(50)),
+                trackColor = MaterialTheme.colorScheme.background,
+                drawStopIndicator = {},
+            )
         }
         Spacer(Modifier.height(16.dp))
         if (isNew) {
             Text(
-                "New kanji",
+                "NEW KANJI",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(bottom = 6.dp),
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
             )
         }
         KanjiCard(current, reveal = revealed)
         Spacer(Modifier.height(16.dp))
         RevealOrAnswer(revealed, preview, onReveal, onAnswer)
-        Spacer(Modifier.height(12.dp))
         if (stats.due > 0) {
-            OutlinedButton(onClick = onReview, modifier = Modifier.fillMaxWidth()) { Text("Review ${stats.due} due") }
+            Spacer(Modifier.height(12.dp))
+            OutlinedButton(onClick = onReview, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
+                Text("Review ${stats.due} due", fontWeight = FontWeight.Bold)
+            }
         }
         Spacer(Modifier.height(20.dp))
-        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Panel(tinted = true) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Kanji on lock screen", fontWeight = FontWeight.SemiBold)
+                    Text("Kanji on lock screen", fontWeight = FontWeight.Bold)
                     Text(
                         "Replaces your lock-screen wallpaper with the current kanji.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                Spacer(Modifier.width(12.dp))
                 Switch(checked = lockOn, onCheckedChange = onLockToggle)
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(12.dp))
         Text(
             "Tip: long-press your home screen → Widgets → Kanjilink to add the widget.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 4.dp),
         )
     }
 }
 
 @Composable
-private fun Stat(label: String, value: String, modifier: Modifier) {
-    Card(modifier, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-        Column(Modifier.padding(12.dp)) {
-            Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 1)
-            Text(
-                label,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                softWrap = false,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
+private fun Stat(value: String, label: String, modifier: Modifier) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, maxLines = 1)
+        Text(
+            label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
 @Composable
-fun Review(k: Kanji?, revealed: Boolean, remaining: Int, preview: Pair<String, String>, onReveal: () -> Unit, onAnswer: (Boolean) -> Unit, onBack: () -> Unit) {
+fun Review(
+    k: Kanji?,
+    revealed: Boolean,
+    remaining: Int,
+    preview: Pair<String, String>,
+    onReveal: () -> Unit,
+    onAnswer: (Boolean) -> Unit,
+    onBack: () -> Unit,
+    total: Int = remaining,
+) {
     Page("Review", onBack = onBack) {
         if (k == null) {
-            Text("All caught up. Nice work!", style = MaterialTheme.typography.headlineSmall)
-            Spacer(Modifier.height(16.dp))
-            Button(onClick = onBack) { Text("Done") }
+            Panel {
+                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    AppMark(56.dp)
+                    Spacer(Modifier.height(16.dp))
+                    Text("All caught up. Nice work!", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(16.dp))
+                    Button(onClick = onBack, modifier = Modifier.heightIn(min = 52.dp)) { Text("Done") }
+                }
+            }
             return@Page
         }
-        Text("$remaining left", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(8.dp))
+        val done = (total - remaining).coerceAtLeast(0)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            LinearProgressIndicator(
+                progress = { if (total == 0) 0f else done.toFloat() / total },
+                modifier = Modifier.weight(1f).height(6.dp).clip(RoundedCornerShape(50)),
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                drawStopIndicator = {},
+            )
+            Spacer(Modifier.width(12.dp))
+            Text("$remaining left", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
+        }
+        Spacer(Modifier.height(16.dp))
         KanjiCard(k, reveal = revealed)
         Spacer(Modifier.height(16.dp))
         RevealOrAnswer(revealed, preview, onReveal, onAnswer)
@@ -328,61 +466,87 @@ fun Settings(
     onBack: () -> Unit,
 ) {
     Page("Settings", onBack = onBack) {
-        Section("Notifications")
-        ToggleRow("Show kanji notifications", s.notificationsOn) { onChange(s.copy(notificationsOn = it)) }
-        Text("New kanji every", style = MaterialTheme.typography.bodyMedium)
-        ChipRow(listOf(1, 2, 3, 4, 6), s.intervalHours, { "${it}h" }) { onChange(s.copy(intervalHours = it)) }
-        Spacer(Modifier.height(8.dp))
-        Text("Quiet hours: no notifications", style = MaterialTheme.typography.bodyMedium)
-        HourStepper("From", s.quietStart) { onChange(s.copy(quietStart = it)) }
-        HourStepper("To", s.quietEnd) { onChange(s.copy(quietEnd = it)) }
-
-        Section("Lock screen")
-        ToggleRow("Kanji as lock-screen wallpaper", s.lockOn) { onChange(s.copy(lockOn = it)) }
-        ChipRow(KanjiRenderer.paletteNames.indices.toList(), s.theme, { KanjiRenderer.paletteNames[it] }) {
-            onChange(s.copy(theme = it))
+        Section("Notifications") {
+            ToggleRow("Show kanji notifications", s.notificationsOn) { onChange(s.copy(notificationsOn = it)) }
+            Label("New kanji every")
+            ChipRow(listOf(1, 2, 3, 4, 6), s.intervalHours, { "${it}h" }) { onChange(s.copy(intervalHours = it)) }
+            Label("Quiet hours (no notifications)")
+            HourStepper("From", s.quietStart) { onChange(s.copy(quietStart = it)) }
+            HourStepper("To", s.quietEnd) { onChange(s.copy(quietEnd = it)) }
         }
-        Text(
-            "Some phones (for example with a custom lock screen) may not show it. Notifications still work.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        Section("Study")
-        Text("Study path starts at", style = MaterialTheme.typography.bodyMedium)
-        ChipRow(listOf(5, 4, 3, 2, 1), s.startLevel, { "N$it" }) { onChange(s.copy(startLevel = it)) }
-        Text("New kanji per day", style = MaterialTheme.typography.bodyMedium)
-        ChipRow(listOf(3, 5, 10, 15), s.newPerDay, { "$it" }) { onChange(s.copy(newPerDay = it)) }
-
-        Section("About")
-        TextButton(onClick = onAbout) { Text("Sources & licences") }
+        Section("Lock screen") {
+            ToggleRow("Kanji as lock-screen wallpaper", s.lockOn) { onChange(s.copy(lockOn = it)) }
+            Label("Style")
+            ChipRow(KanjiRenderer.paletteNames.indices.toList(), s.theme, { KanjiRenderer.paletteNames[it] }) {
+                onChange(s.copy(theme = it))
+            }
+            Text(
+                "Some phones (for example with a custom lock screen) may not show it. Notifications still work.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Section("Study") {
+            Label("Study path starts at")
+            ChipRow(listOf(5, 4, 3, 2, 1), s.startLevel, { "N$it" }) { onChange(s.copy(startLevel = it)) }
+            Label("New kanji per day")
+            ChipRow(listOf(3, 5, 10, 15), s.newPerDay, { "$it" }) { onChange(s.copy(newPerDay = it)) }
+        }
+        Section("About") {
+            TextButton(onClick = onAbout) { Text("Sources & licences", fontWeight = FontWeight.Bold) }
+        }
     }
 }
 
 @Composable
-private fun Section(title: String) {
+private fun Section(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Text(
+        title.uppercase(),
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp),
+    )
+    Panel(content = content)
     Spacer(Modifier.height(16.dp))
-    HorizontalDivider()
+}
+
+@Composable
+private fun Label(text: String) {
     Spacer(Modifier.height(12.dp))
-    Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+    Text(text, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
     Spacer(Modifier.height(4.dp))
 }
 
 @Composable
 private fun ToggleRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, Modifier.weight(1f))
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, Modifier.weight(1f), fontWeight = FontWeight.Medium)
+        Spacer(Modifier.width(12.dp))
         Switch(checked = checked, onCheckedChange = onChange)
     }
 }
 
+/** "From  –  22:00  +". On a narrow screen the buttons move under the label instead of being squeezed. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun HourStepper(label: String, hour: Int, onChange: (Int) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(label, Modifier.padding(end = 8.dp))
-        TextButton(onClick = { onChange((hour + 23) % 24) }) { Text("–") }
-        Text("%02d:00".format(hour), fontWeight = FontWeight.SemiBold)
-        TextButton(onClick = { onChange((hour + 1) % 24) }) { Text("+") }
+    val pad = androidx.compose.foundation.layout.PaddingValues(0.dp)
+    FlowRow(
+        Modifier.fillMaxWidth().padding(vertical = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, Modifier.widthIn(min = 56.dp), softWrap = false)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            OutlinedButton(onClick = { onChange((hour + 23) % 24) }, modifier = Modifier.size(48.dp), contentPadding = pad) {
+                Text("–", fontWeight = FontWeight.Bold)
+            }
+            Text("%02d:00".format(hour), fontWeight = FontWeight.Bold, softWrap = false, modifier = Modifier.padding(horizontal = 10.dp))
+            OutlinedButton(onClick = { onChange((hour + 1) % 24) }, modifier = Modifier.size(48.dp), contentPadding = pad) {
+                Text("+", fontWeight = FontWeight.Bold)
+            }
+        }
     }
 }
 
@@ -390,31 +554,45 @@ private fun HourStepper(label: String, hour: Int, onChange: (Int) -> Unit) {
 fun About(dataVersion: String, appVersion: String, onBack: () -> Unit) {
     val uri = LocalUriHandler.current
     Page("Sources & licences", onBack = onBack) {
-        Text("Kanjilink $appVersion", fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(12.dp))
-        Text(
-            "This app uses the KANJIDIC2 dictionary file (database version $dataVersion). These files are the " +
-                "property of the Electronic Dictionary Research and Development Group, and are used in conformance " +
-                "with the Group's licence (Creative Commons Attribution-ShareAlike 4.0).",
-        )
-        LinkButton("KANJIDIC Project") { uri.openUri("https://www.edrdg.org/wiki/index.php/KANJIDIC_Project") }
-        LinkButton("EDRDG licence") { uri.openUri("https://www.edrdg.org/edrdg/licence.html") }
-        Spacer(Modifier.height(12.dp))
-        Text("JLPT N5–N1 kanji lists by Jonathan Waller (tanos.co.uk), via the kanji-data project by David Gouveia (MIT).")
-        LinkButton("Jonathan Waller's JLPT resources") { uri.openUri("http://www.tanos.co.uk/jlpt/") }
-        LinkButton("kanji-data") { uri.openUri("https://github.com/davidluzgouveia/kanji-data") }
-        Spacer(Modifier.height(12.dp))
-        Text(
-            "The JLPT has not published official kanji lists since 2010; levels are a study guide only.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(12.dp))
-        Text("Privacy: no account, no ads, no tracking. Your progress is stored only on this phone.")
+        Panel {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                AppMark(44.dp)
+                Spacer(Modifier.width(12.dp))
+                Text("Kanjilink $appVersion", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+            }
+            Spacer(Modifier.height(12.dp))
+            Text("Privacy: no account, no ads, no tracking. Your progress is stored only on this phone.")
+        }
+        Spacer(Modifier.height(16.dp))
+        Panel {
+            Text(
+                "This app uses the KANJIDIC2 dictionary file (database version $dataVersion). These files are the " +
+                    "property of the Electronic Dictionary Research and Development Group, and are used in conformance " +
+                    "with the Group's licence (Creative Commons Attribution-ShareAlike 4.0).",
+            )
+            LinkButton("KANJIDIC Project") { uri.openUri("https://www.edrdg.org/wiki/index.php/KANJIDIC_Project") }
+            LinkButton("EDRDG licence") { uri.openUri("https://www.edrdg.org/edrdg/licence.html") }
+        }
+        Spacer(Modifier.height(16.dp))
+        Panel {
+            Text("JLPT N5–N1 kanji lists by Jonathan Waller (tanos.co.uk), via the kanji-data project by David Gouveia (MIT).")
+            LinkButton("Jonathan Waller's JLPT resources") { uri.openUri("http://www.tanos.co.uk/jlpt/") }
+            LinkButton("kanji-data") { uri.openUri("https://github.com/davidluzgouveia/kanji-data") }
+            Text(
+                "The JLPT has not published official kanji lists since 2010; levels are a study guide only.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(16.dp))
+        Panel {
+            Text("Kanji are set in Noto Serif JP (SIL Open Font License 1.1). Icons: Material Icons (Apache 2.0).")
+            LinkButton("Noto CJK fonts") { uri.openUri("https://github.com/notofonts/noto-cjk") }
+        }
     }
 }
 
 @Composable
 private fun LinkButton(label: String, onClick: () -> Unit) {
-    TextButton(onClick = onClick) { Text(label) }
+    TextButton(onClick = onClick) { Text(label, fontWeight = FontWeight.Bold) }
 }
