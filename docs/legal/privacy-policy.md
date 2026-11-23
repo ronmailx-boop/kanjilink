@@ -31,6 +31,6 @@ Kanjilink Pro נמכר באמצעות Google Play. התשלום, הקבלות, �
 שינויים במדיניות יפורסמו בעמוד זה, יחד עם עדכון תאריך התחולה.
 
 ## 9. יצירת קשר
-Vplus Studio · [CONTACT_EMAIL]
+Vplus Studio · vplusstudio.app@gmail.com
 
 גרסה באנגלית: https://kanjilink.vplusstudio.app/privacy

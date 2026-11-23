@@ -11,4 +11,4 @@
 ספק האירוח (Cloudflare) עשוי לעבד נתונים טכניים הדרושים להגשת האתר ולאבטחתו (למשל כתובת IP), בהתאם ל[מדיניות הפרטיות של Cloudflare](https://www.cloudflare.com/privacypolicy/).
 
 ## יצירת קשר
-Vplus Studio · [CONTACT_EMAIL]
+Vplus Studio · vplusstudio.app@gmail.com

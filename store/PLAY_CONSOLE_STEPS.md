@@ -45,7 +45,7 @@ Monetize ← Products ← **In-app products** ← Create product:
 
 ## ז. Store settings
 - App category: **Education** · Tags: Education, Language learning
-- Contact email: [CONTACT_EMAIL] · Website: `https://kanjilink.vplusstudio.app`
+- Contact email: vplusstudio.app@gmail.com · Website: `https://kanjilink.vplusstudio.app`
 
 ## ח. אחרי זה (אני)
 דף החנות באנגלית, 6 צילומי מסך, תמונת נושא ואייקון מ-`store/en-US/` דרך ה-API (תראה ותאשר לפני), ואז גרסה ב-Internal testing. הפרסום ל-Production נשאר אצלך.

@@ -4,7 +4,7 @@
 Preparing the first Google Play release (Ron approved the app, 23.11.2026). Ready in the repo: Pro via Play Billing
 (product `kanjilink_pro`, N5 free), signed release AAB (upload key sent to Ron, never committed), website + legal docs
 (`site/`, `docs/legal/`), store listing text and images (`store/en-US/`), and Ron's manual steps (`store/PLAY_CONSOLE_STEPS.md`).
-Waiting for Ron: contact email + Pro price, GitHub secrets (4 upload-key values + CLOUDFLARE_API_TOKEN), create the app in
+Contact email vplusstudio.app@gmail.com, Pro price $4.99. Waiting for Ron: GitHub secrets (4 upload-key values + CLOUDFLARE_API_TOKEN), create the app in
 Play Console, first manual AAB upload, App content forms, the in-app product, draft-app permission for the service account.
 Then: deploy the site, upload the listing via the API (show Ron first), Internal testing draft.
 
@@ -32,7 +32,8 @@ Then: deploy the site, upload the listing via the API (show Ron first), Internal
 - [x] Upload key created (PKCS12, alias kanjilink-upload, SHA-256 12:29:A3:…:96:64); sent to Ron as a file, not in git
 - [x] Play Billing 8.3.0: one-time `kanjilink_pro`; free = N5 path; Pro = N4–N1; paywall, upgrade card, restore
 - [x] Website `site/` for kanjilink.vplusstudio.app (privacy, terms, accessibility) + `wrangler.jsonc` + deploy workflow
-- [x] Hebrew legal docs in `docs/legal/` (privacy, terms, cookies, accessibility) – [CONTACT_EMAIL] still a placeholder
+- [x] Hebrew legal docs in `docs/legal/` (privacy, terms, cookies, accessibility); contact vplusstudio.app@gmail.com
+- [x] CI artifacts: debug APK 14 days (not on PRs), release AAB 30 days, screenshots only on failure (7 days)
 - [x] Store listing en-US (`store/en-US/listing.json`), icon 512, feature graphic, 6 screenshots (`tools/make_store_assets.py`)
 - [x] Signed release AAB builds locally (fixed lint: androidx.fragment 1.8.8)
 - [ ] Ron: email + price, secrets, Play Console steps (store/PLAY_CONSOLE_STEPS.md)
