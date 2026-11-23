@@ -118,6 +118,11 @@ class StudyTest {
     }
 
     @Test
+    fun readingLineSkipsRepeatedForms() {
+        assertEquals("スイ sui · みず mizu", KanjiRepository.byChar(ctx, "水")!!.readingLine)
+    }
+
+    @Test
     fun kanjiStyleDefaultsToSans() {
         assertEquals(0, Prefs(ctx).kanjiStyle)
     }

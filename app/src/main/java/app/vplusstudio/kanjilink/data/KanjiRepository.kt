@@ -17,12 +17,17 @@ data class Kanji(
 ) {
     val meaningLine: String get() = meanings.take(3).joinToString(", ")
 
-    /** "ニチ nichi · ひ hi": first two readings of each kind. */
+    /** "ニチ nichi · ひ hi": first two readings of each kind, skipping forms like みず- that repeat みず. */
     val readingLine: String
         get() {
+            fun norm(r: String) = r.filter { it != '-' && it != '(' && it != ')' }
             val parts = mutableListOf<String>()
-            on.take(2).forEachIndexed { i, r -> parts += "$r ${onRomaji[i]}" }
-            kun.take(2).forEachIndexed { i, r -> parts += "$r ${kunRomaji[i]}" }
+            val seen = mutableSetOf<String>()
+            fun add(kana: String, romaji: String) {
+                if (seen.add(norm(kana))) parts += "$kana $romaji"
+            }
+            on.indices.take(2).forEach { add(on[it], onRomaji[it]) }
+            kun.indices.filter { norm(kun[it]) !in seen }.take(2).forEach { add(kun[it], kunRomaji[it]) }
             return parts.joinToString(" · ")
         }
 }
