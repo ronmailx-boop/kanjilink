@@ -459,6 +459,7 @@ fun Paywall(
     onBuy: () -> Unit,
     onRestore: () -> Unit,
     onBack: () -> Unit,
+    onReviewCode: (String) -> Boolean = { false },
 ) {
     Page("Kanjilink Pro", onBack = onBack) {
         Panel {
@@ -499,10 +500,40 @@ fun Paywall(
             }
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = onRestore, modifier = Modifier.fillMaxWidth()) { Text("Restore purchase", fontWeight = FontWeight.Bold) }
+            ReviewCode(onReviewCode)
         } else {
             Button(onClick = onBack, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Continue", fontWeight = FontWeight.Bold) }
         }
     }
+}
+
+/** Small "Have a review code?" link that opens a field; for Google Play's app reviewers. */
+@Composable
+private fun ReviewCode(onReviewCode: (String) -> Boolean) {
+    val open = remember { androidx.compose.runtime.mutableStateOf(false) }
+    val code = remember { androidx.compose.runtime.mutableStateOf("") }
+    val error = remember { androidx.compose.runtime.mutableStateOf(false) }
+    if (!open.value) {
+        TextButton(onClick = { open.value = true }, modifier = Modifier.fillMaxWidth()) {
+            Text("Have a review code?", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        return
+    }
+    Spacer(Modifier.height(8.dp))
+    androidx.compose.material3.OutlinedTextField(
+        value = code.value,
+        onValueChange = { code.value = it; error.value = false },
+        label = { Text("Review code") },
+        singleLine = true,
+        isError = error.value,
+        supportingText = { if (error.value) Text("This code is not valid.") },
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Spacer(Modifier.height(8.dp))
+    OutlinedButton(
+        onClick = { if (!onReviewCode(code.value)) error.value = true },
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+    ) { Text("Apply code", fontWeight = FontWeight.Bold) }
 }
 
 @Composable

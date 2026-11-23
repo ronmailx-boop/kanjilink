@@ -37,6 +37,9 @@ class Billing(
 
     companion object {
         const val PRODUCT_ID = "kanjilink_pro"
+
+        /** SHA-256 of the review code (the code itself is only in Play Console's App access form). */
+        private const val REVIEW_CODE_SHA256 = "de0c3ad17cf6ea171867f039308bc5fb5ed47e133905647d886b57196044b748"
         private const val TAG = "KanjilinkBilling"
     }
 
@@ -130,14 +133,26 @@ class Billing(
             }
         }
         // A query that finds nothing means not owned (for example after a refund).
-        val isPro = owned || (!fromQuery && state.isPro)
-        prefs.isPro = isPro
+        val bought = owned || (!fromQuery && prefs.playPro)
+        prefs.playPro = bought
+        val isPro = bought || prefs.reviewUnlock
         val message = when {
             owned && !fromQuery -> "Thank you! Kanjilink Pro is unlocked."
             pending && !owned -> "Your payment is pending. Pro unlocks when it completes."
             else -> null
         }
         update(state.copy(isPro = isPro, message = message ?: state.message))
+    }
+
+    /** Unlocks Pro for Google Play's reviewers with the code given in Play Console (App access). */
+    fun redeemReviewCode(code: String): Boolean {
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(code.trim().uppercase().toByteArray())
+            .joinToString("") { "%02x".format(it) }
+        if (digest != REVIEW_CODE_SHA256) return false
+        prefs.reviewUnlock = true
+        update(state.copy(isPro = true, message = "Review access: Kanjilink Pro is unlocked."))
+        return true
     }
 
     fun clearMessage() = update(state.copy(message = null))
