@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Heebo"; font-weight: 400; src: url(assets/fonts/heebo-latin-400-normal.woff2) format("woff2"); }
+      @font-face { font-family: "Heebo"; font-weight: 800; src: url(assets/fonts/heebo-latin-800-normal.woff2) format("woff2"); }
+      @font-face { font-family: "NotoJP"; font-weight: 700; src: url(assets/fonts/noto_sans_jp_bold.otf) format("opentype"); }
+      :root {
+        --paper: #f7f3ea; --surface: #fffcf5; --ink: #1c1b19; --muted: #5e5850;
+        --red: #c8402f; --red-light: #e86a56; --night: #111216; --night-2: #1b1c21; --line: #e3dacb;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--paper); }
+      #root { width: 100%; height: 100%; position: relative; font-family: "Heebo", sans-serif; color: var(--ink); background: var(--paper); }
+      .scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; text-align: center; }
+      .jp { font-family: "NotoJP", sans-serif; font-weight: 700; }
+      .dark { background: var(--night); color: #f4f1ea; }
+      .paper { background: var(--paper); }
+      .head { margin-top: 150px; padding: 0 80px; font-size: 76px; font-weight: 800; line-height: 1.08; letter-spacing: -1px; }
+      .head em { font-style: normal; color: var(--red); }
+      .dark .head em { color: var(--red-light); }
+      .sub { margin-top: 22px; font-size: 40px; color: var(--muted); padding: 0 90px; line-height: 1.3; }
+      .dark .sub { color: #b9b3a8; }
+      .phone { position: absolute; left: 50%; top: 430px; width: 600px; margin-left: -300px; border-radius: 44px; overflow: hidden;
+               box-shadow: 0 30px 80px rgba(28, 27, 25, .22), 0 0 0 10px #1c1b19; }
+      .phone img { display: block; width: 100%; }
+      .dark .phone { box-shadow: 0 30px 90px rgba(0,0,0,.6), 0 0 0 10px #2a2b31; }
+
+      /* S1 hook */
+      #s1 .line1 { position: absolute; top: 330px; left: 80px; right: 80px; font-size: 92px; font-weight: 800; line-height: 1.05; }
+      #s1 .line2 { position: absolute; top: 1180px; left: 80px; right: 80px; font-size: 72px; font-weight: 800; line-height: 1.1; }
+      #s1 .line2 em { font-style: normal; color: var(--red-light); }
+      #s1 .glyph { position: absolute; top: 560px; left: 0; right: 0; font-size: 460px; line-height: 1; color: #f4f1ea; }
+      #s1 .glyph-meaning { position: absolute; top: 1060px; left: 0; right: 0; font-size: 44px; color: #b9b3a8; }
+
+      /* S2 logo */
+      #s2 { justify-content: center; gap: 46px; }
+      #s2 img { width: 300px; height: 300px; border-radius: 68px; box-shadow: 0 24px 60px rgba(200,64,47,.35); }
+      #s2 .name { font-size: 128px; font-weight: 800; letter-spacing: -2px; }
+      #s2 .tag { font-size: 44px; color: var(--muted); margin-top: -20px; }
+
+      /* S5 notification */
+      #s5 .shade { position: absolute; left: 70px; right: 70px; top: 520px; height: 900px; border-radius: 48px; background: linear-gradient(160deg, #2a2b31, #111216); }
+      #s5 .clock { position: absolute; top: 590px; left: 0; right: 0; font-size: 150px; font-weight: 400; color: #f4f1ea; }
+      .notif { position: absolute; left: 110px; right: 110px; top: 850px; background: var(--surface); border-radius: 36px; padding: 34px 38px 30px; text-align: left;
+               box-shadow: 0 20px 50px rgba(0,0,0,.35); }
+      .notif .app { display: flex; align-items: center; gap: 14px; font-size: 30px; color: var(--muted); }
+      .notif .app img { width: 40px; height: 40px; border-radius: 10px; }
+      .notif .body { display: flex; align-items: center; gap: 32px; margin-top: 18px; }
+      .notif .k { font-size: 150px; line-height: 1; }
+      .notif .t1 { font-size: 46px; font-weight: 800; }
+      .notif .t2 { font-size: 34px; color: var(--muted); margin-top: 6px; }
+      .notif .acts { display: flex; gap: 60px; margin-top: 22px; font-size: 34px; font-weight: 800; color: var(--red); }
+
+      /* S7 answers */
+      #s7 .card { position: absolute; top: 470px; left: 130px; right: 130px; background: var(--surface); border-radius: 44px; padding: 60px 40px 50px;
+                  box-shadow: 0 24px 60px rgba(28,27,25,.14); border: 2px solid var(--line); }
+      #s7 .card .k { font-size: 300px; line-height: 1; }
+      #s7 .card .m { font-size: 46px; font-weight: 800; margin-top: 24px; }
+      #s7 .btns { position: absolute; top: 1060px; left: 130px; right: 130px; display: flex; gap: 30px; }
+      .btn { flex: 1; border-radius: 60px; padding: 30px 0 24px; font-size: 42px; font-weight: 800; }
+      .btn small { display: block; font-size: 30px; font-weight: 400; margin-top: 4px; opacity: .85; }
+      .btn.again { background: var(--surface); color: var(--red); border: 3px solid var(--red); }
+      .btn.know { background: var(--red); color: #fff; }
+      #s7 .tap { position: absolute; width: 110px; height: 110px; border-radius: 50%; background: rgba(28,27,25,.25); top: 1080px; opacity: 0; }
+
+      /* S8 levels */
+      #s8 .count { margin-top: 330px; font-size: 230px; font-weight: 800; color: var(--red); letter-spacing: -6px; line-height: 1; }
+      #s8 .label { font-size: 60px; font-weight: 800; margin-top: 10px; }
+      #s8 .levels { display: flex; gap: 22px; margin-top: 90px; }
+      #s8 .lv { width: 160px; height: 160px; border-radius: 34px; background: var(--surface); border: 3px solid var(--line); display: flex; flex-direction: column;
+                align-items: center; justify-content: center; font-size: 56px; font-weight: 800; }
+      #s8 .lv span { font-size: 26px; font-weight: 400; color: var(--muted); }
+      #s8 .lv.free { background: var(--red); color: #fff; border-color: var(--red); }
+      #s8 .lv.free span { color: #fde3dd; }
+      #s8 .wall { margin-top: 90px; font-size: 140px; line-height: 1.25; letter-spacing: 18px; color: var(--ink); opacity: .9; }
+      #s8 .note { margin-top: 40px; font-size: 34px; color: var(--muted); }
+
+      /* S9 privacy */
+      #s9 { justify-content: center; gap: 50px; }
+      #s9 .row { display: flex; align-items: center; gap: 34px; font-size: 96px; font-weight: 800; }
+      #s9 .x { width: 110px; height: 110px; border-radius: 50%; background: var(--red); color: #fff; font-size: 70px; line-height: 110px; text-align: center; }
+      #s9 .sub2 { font-size: 46px; color: var(--muted); margin-top: 20px; }
+
+      /* S10 end */
+      #s10 .glyph { margin-top: 250px; font-size: 300px; line-height: 1; color: #f4f1ea; }
+      #s10 .slogan { margin-top: 40px; font-size: 70px; font-weight: 800; line-height: 1.1; padding: 0 90px; }
+      #s10 .brand { display: flex; align-items: center; gap: 30px; margin-top: 110px; }
+      #s10 .brand img { width: 150px; height: 150px; border-radius: 34px; }
+      #s10 .brand .name { font-size: 96px; font-weight: 800; letter-spacing: -2px; }
+      #s10 .play { margin-top: 60px; background: var(--red); color: #fff; border-radius: 70px; padding: 30px 70px 26px; font-size: 52px; font-weight: 800; }
+      #s10 .fine { margin-top: 34px; font-size: 32px; color: #b9b3a8; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="37.5" data-width="1080" data-height="1920">
+      <audio id="vo" src="assets/soundtrack.mp3" data-start="0" data-duration="37.5" data-track-index="5"></audio>
+
+      <!-- 0.0 You look at your phone all day. / What if every glance taught you a kanji? -->
+      <div id="s1" class="scene dark clip" data-start="0" data-duration="5.25" data-track-index="0">
+        <div class="line1">You look at your phone all day.</div>
+        <div class="glyph jp">学</div>
+        <div class="glyph-meaning">study, learning</div>
+        <div class="line2">What if every glance taught you <em>a kanji?</em></div>
+      </div>
+
+      <!-- 5.4 Meet Kanjilink -->
+      <div id="s2" class="scene paper clip" data-start="5.25" data-duration="1.55" data-track-index="0">
+        <img src="assets/img/icon.png" alt="" />
+        <div class="name">Kanjilink</div>
+        <div class="tag">Kanji on your lock screen</div>
+      </div>
+
+      <!-- 6.9 lock screen -->
+      <div id="s3" class="scene dark clip" data-start="6.8" data-duration="2.6" data-track-index="0">
+        <div class="head">On your <em>lock screen</em></div>
+        <div class="phone"><img src="assets/img/screen1.png" alt="" /></div>
+      </div>
+
+      <!-- 9.4 widget -->
+      <div id="s4" class="scene paper clip" data-start="9.4" data-duration="1.15" data-track-index="0">
+        <div class="head">In a home-screen <em>widget</em></div>
+        <div class="phone"><img src="assets/img/screen4.png" alt="" /></div>
+      </div>
+
+      <!-- 10.5 notification -->
+      <div id="s5" class="scene paper clip" data-start="10.55" data-duration="3.45" data-track-index="0">
+        <div class="head">A gentle <em>notification</em><br />every few hours</div>
+        <div class="shade"></div>
+        <div class="clock">14:00</div>
+        <div class="notif">
+          <div class="app"><img src="assets/img/icon.png" alt="" />Kanjilink · now</div>
+          <div class="body">
+            <div class="k jp">水</div>
+            <div>
+              <div class="t1">water</div>
+              <div class="t2"><span class="jp" style="font-weight:700">スイ</span> sui · <span class="jp" style="font-weight:700">みず</span> mizu</div>
+            </div>
+          </div>
+          <div class="acts"><span>AGAIN</span><span>I KNOW IT</span></div>
+        </div>
+      </div>
+
+      <!-- 14.1 meaning and readings -->
+      <div id="s6" class="scene paper clip" data-start="14.0" data-duration="4.75" data-track-index="0">
+        <div class="head">Meaning + readings,<br /><em>with romaji</em></div>
+        <div class="sub">Start from zero</div>
+        <div class="phone" style="top:560px"><img src="assets/img/screen2.png" alt="" /></div>
+      </div>
+
+      <!-- 18.8 answers -->
+      <div id="s7" class="scene paper clip" data-start="18.75" data-duration="5.3" data-track-index="0">
+        <div class="head">Spaced repetition</div>
+        <div class="card">
+          <div class="k jp">国</div>
+          <div class="m">country</div>
+        </div>
+        <div class="btns">
+          <div class="btn again" id="bAgain">Again<small>in 10 min</small></div>
+          <div class="btn know" id="bKnow">I know it<small>tomorrow</small></div>
+        </div>
+        <div class="tap" id="tap"></div>
+      </div>
+
+      <!-- 24.2 2,000+ kanji N5 to N1 -->
+      <div id="s8" class="scene paper clip" data-start="24.05" data-duration="4.15" data-track-index="0">
+        <div class="count" id="count">0</div>
+        <div class="label">kanji, JLPT N5 → N1</div>
+        <div class="levels">
+          <div class="lv free">N5<span>free</span></div>
+          <div class="lv">N4<span>Pro</span></div>
+          <div class="lv">N3<span>Pro</span></div>
+          <div class="lv">N2<span>Pro</span></div>
+          <div class="lv">N1<span>Pro</span></div>
+        </div>
+        <div class="wall jp">日月火<br />水木金</div>
+      </div>
+
+      <!-- 28.2 No account. No ads. -->
+      <div id="s9" class="scene paper clip" data-start="28.2" data-duration="2.6" data-track-index="0">
+        <div class="row" id="r1"><div class="x">✕</div>No account</div>
+        <div class="row" id="r2"><div class="x">✕</div>No ads</div>
+        <div class="sub2" id="r3">Your progress stays on your phone</div>
+      </div>
+
+      <!-- 30.9 end card -->
+      <div id="s10" class="scene dark clip" data-start="30.8" data-duration="6.7" data-track-index="0">
+        <div class="glyph jp">字</div>
+        <div class="slogan">Just learning,<br />every time you look.</div>
+        <div class="brand"><img src="assets/img/icon.png" alt="" /><div class="name">Kanjilink</div></div>
+        <div class="play">Free on Google Play</div>
+        <div class="fine">JLPT N5 free · Pro unlocks N4–N1</div>
+      </div>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const pop = { opacity: 0, y: 60 };
+      const popTo = (d) => ({ opacity: 1, y: 0, duration: d || 0.5, ease: "power3.out" });
+
+      // S1 (first frame must not be empty)
+      tl.set("#s1 .line1", { opacity: 1 }, 0);
+      tl.fromTo("#s1 .glyph", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.7, ease: "back.out(1.6)" }, 2.4);
+      tl.fromTo("#s1 .glyph-meaning", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 2.9);
+      tl.fromTo("#s1 .line2", pop, popTo(0.5), 2.5);
+      tl.to("#s1 .line1", { opacity: 0.35, duration: 0.5 }, 2.4);
+
+      // S2
+      tl.fromTo("#s2 img", { opacity: 0, scale: 0.6, rotate: -8 }, { opacity: 1, scale: 1, rotate: 0, duration: 0.55, ease: "back.out(1.8)" }, 5.3);
+      tl.fromTo("#s2 .name", pop, popTo(0.45), 5.45);
+      tl.fromTo("#s2 .tag", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 5.75);
+
+      // S3
+      tl.fromTo("#s3 .head", pop, popTo(0.45), 6.85);
+      tl.fromTo("#s3 .phone", { opacity: 0, y: 200 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 6.9);
+      tl.to("#s3 .phone", { scale: 1.04, duration: 2, ease: "none" }, 7.5);
+
+      // S4
+      tl.fromTo("#s4 .head", pop, popTo(0.35), 9.42);
+      tl.fromTo("#s4 .phone", { opacity: 0, x: 300 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 9.42);
+
+      // S5
+      tl.fromTo("#s5 .head", pop, popTo(0.45), 10.6);
+      tl.fromTo("#s5 .shade, #s5 .clock", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 10.6);
+      tl.fromTo("#s5 .notif", { opacity: 0, y: -260 }, { opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.4)" }, 11.2);
+
+      // S6
+      tl.fromTo("#s6 .head", pop, popTo(0.45), 14.05);
+      tl.fromTo("#s6 .sub", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 16.9);
+      tl.fromTo("#s6 .phone", { opacity: 0, y: 220 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 14.15);
+      tl.to("#s6 .phone", { y: -120, duration: 3.6, ease: "sine.inOut" }, 15.0);
+
+      // S7: tap "I know it" (~19.4), then "Again" (~22.2)
+      tl.fromTo("#s7 .head", pop, popTo(0.4), 18.8);
+      tl.fromTo("#s7 .card", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, 18.85);
+      tl.fromTo("#s7 .btns", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4 }, 19.0);
+      tl.set("#tap", { left: 700 }, 19.0);
+      tl.fromTo("#tap", { opacity: 0.8, scale: 0.3 }, { opacity: 0, scale: 1.6, duration: 0.6 }, 19.6);
+      tl.to("#bKnow", { scale: 1.12, duration: 0.18, yoyo: true, repeat: 1 }, 19.6);
+      tl.to("#bAgain", { opacity: 0.35, duration: 0.3 }, 19.7);
+      tl.to("#bAgain", { opacity: 1, duration: 0.3 }, 21.5);
+      tl.set("#tap", { left: 270 }, 21.6);
+      tl.fromTo("#tap", { opacity: 0.8, scale: 0.3 }, { opacity: 0, scale: 1.6, duration: 0.6 }, 22.0);
+      tl.to("#bAgain", { scale: 1.12, duration: 0.18, yoyo: true, repeat: 1 }, 22.0);
+      tl.to("#bKnow", { opacity: 0.35, duration: 0.3 }, 22.1);
+
+      // S8
+      const counter = { v: 0 };
+      tl.fromTo("#s8 .count", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4 }, 24.1);
+      tl.to(counter, { v: 2211, duration: 1.8, ease: "power2.out",
+        onUpdate: () => { document.getElementById("count").textContent = Math.round(counter.v).toLocaleString("en-US"); } }, 24.2);
+      tl.fromTo("#s8 .label", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 24.6);
+      tl.fromTo("#s8 .lv", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.25, ease: "power3.out" }, 25.9);
+      tl.fromTo("#s8 .wall", { opacity: 0 }, { opacity: 0.9, duration: 0.6 }, 26.1);
+
+      // S9
+      tl.fromTo("#r1", { opacity: 0, x: -120 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 28.25);
+      tl.fromTo("#r2", { opacity: 0, x: -120 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 29.1);
+      tl.fromTo("#r3", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 29.35);
+
+      // S10
+      tl.fromTo("#s10 .glyph", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.7, ease: "power3.out" }, 30.85);
+      tl.fromTo("#s10 .slogan", pop, popTo(0.5), 31.0);
+      tl.fromTo("#s10 .brand", pop, popTo(0.5), 33.4);
+      tl.fromTo("#s10 .play", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, 34.4);
+      tl.fromTo("#s10 .fine", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 35.0);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
