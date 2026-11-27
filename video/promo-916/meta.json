@@ -1,0 +1,10 @@
+{
+  "title": "Kanjilink: learn Japanese kanji on your lock screen",
+  "description": "Learn a Japanese kanji every time you look at your phone.\n\nKanjilink puts one kanji on your lock screen, in a home-screen widget and in a gentle notification every few hours. Each kanji shows its meaning and its on and kun readings, with romaji, so you can start from zero.\n\n• Spaced repetition: tap \"I know it\" and it comes back tomorrow, tap \"Again\" and it comes back in 10 minutes\n• 2,211 kanji from JLPT N5 to N1\n• JLPT N5 is free; Kanjilink Pro unlocks N4 to N1 with one payment, no subscription\n• No account, no ads, your progress stays on your phone\n\nGet it on Google Play: https://play.google.com/store/apps/details?id=app.vplusstudio.kanjilink\nWebsite: https://kanjilink.vplusstudio.app\n\nKanji data: KANJIDIC2 by EDRDG (CC BY-SA 4.0).",
+  "tags": ["kanji", "learn kanji", "japanese", "learn japanese", "JLPT", "JLPT N5", "kanji app", "lock screen", "widget", "spaced repetition", "Kanjilink", "android app"],
+  "categoryId": "27",
+  "defaultLanguage": "en",
+  "defaultAudioLanguage": "en",
+  "privacyStatus": "public",
+  "madeForKids": false
+}

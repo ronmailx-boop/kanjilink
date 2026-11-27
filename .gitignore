@@ -9,3 +9,10 @@ local.properties
 .env
 captures/
 .kotlin/
+
+# Promo videos: never commit media
+video/out/
+video/work/
+video/**/.hyperframes/
+video/**/*.mp3
+video/**/*.mp4
