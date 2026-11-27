@@ -11,7 +11,9 @@ test purchase OK.
    only in Play Console's App access form and in Ron's file `kanjilink-review-code.txt`).
 2. Small follow-up release: upload native debug symbols (Play warning) – add
    `ndk { debugSymbolLevel = "FULL" }` under `defaultConfig` / release in `app/build.gradle.kts`.
-3. After launch: marketing with Buzz Builder (store listing translations ES/PT/FR/DE, promo video, posts).
+3. After launch: marketing with Buzz Builder (store listing translations ES/PT/FR/DE, posts).
+   - [x] English promo video 9:16 (27.11.2026): https://www.youtube.com/watch?v=T57MpnJ5s4Q (public),
+     on the Play en-US store page. Project `video/promo-916/`, details in `video/README.md`.
 4. Later features: stroke order (KanjiVG), example words (JMdict), translated meanings.
 
 **How releases work:** push to `main` → GitHub Actions "Android build" builds a signed AAB (`kanjilink-release-aab`
